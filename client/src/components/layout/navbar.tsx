@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const { user, isLoading, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const handleLogout = async () => {
@@ -72,9 +72,7 @@ export function Navbar() {
 
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center space-x-3">
-            {isLoading ? (
-              <div className="h-8 w-20 rounded-md bg-muted animate-pulse" />
-            ) : user ? (
+            {user ? (
               <>
                 <Link href="/dashboard" id="nav-btn-dashboard">
                   <Button variant="ghost" size="sm" className="gap-2">
@@ -102,7 +100,7 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Link href="/register" id="nav-btn-register">
-                  <Button size="sm">Get Started</Button>
+                  <Button size="sm">Sign Up</Button>
                 </Link>
               </>
             )}
@@ -175,7 +173,7 @@ export function Navbar() {
                     </Button>
                   </Link>
                   <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full justify-center">Get Started</Button>
+                    <Button className="w-full justify-center">Sign Up</Button>
                   </Link>
                 </>
               )}
