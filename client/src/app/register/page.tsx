@@ -19,10 +19,10 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Container } from '@/components/layout/container';
-import { GraduationCap, ShieldAlert, CheckCircle2, Info } from 'lucide-react';
+import { GraduationCap, ShieldAlert, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useAuth, ApiError } from '@/contexts/AuthContext';
 
 // Strict schema: Only 'student' and 'alumni' are permitted for public self-registration.
-// Administrative, verification officer, and placement officer roles CANNOT be self-assigned.
 const registerSchema = z
   .object({
     fullName: z
@@ -53,8 +53,12 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 function RegisterFormContent() {
   const searchParams = useSearchParams();
   const initialRole = searchParams.get('role') === 'alumni' ? 'alumni' : 'student';
+  const { register: registerUser } = useAuth();
 
-  const [submissionNotice, setSubmissionNotice] = React.useState<string | null>(null);
+  const [serverError, setServerError] = React.useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = React.useState<Array<{ field: string; message: string }>>(
+    []
+  );
   const [isLoading, setIsLoading] = React.useState(false);
 
   const {
@@ -76,18 +80,26 @@ function RegisterFormContent() {
 
   const selectedRole = watch('role');
 
-  const onSubmit = async (_data: RegisterFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
-    setSubmissionNotice(null);
-
-    // Simulate standard asynchronous network validation
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setIsLoading(false);
-
-    // Phase 1 scope notice
-    setSubmissionNotice(
-      'Phase 1 Architecture Check: Registration input validation succeeded with role-restricted permissions. Backend user persistence & institutional alumni verification pipelines will be connected in Phase 2.'
-    );
+    setServerError(null);
+    setFieldErrors([]);
+    try {
+      await registerUser(data);
+      // Navigation to /dashboard is handled by AuthContext.register
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.details && err.details.length > 0) {
+          setFieldErrors(err.details);
+        } else {
+          setServerError(err.message);
+        }
+      } else {
+        setServerError('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -115,12 +127,24 @@ function RegisterFormContent() {
             </CardHeader>
 
             <CardContent className="space-y-4">
-              {submissionNotice && (
-                <Alert variant="info" className="text-xs">
-                  <Info className="h-4 w-4" />
-                  <AlertTitle className="text-xs font-semibold">Validation Notice</AlertTitle>
-                  <AlertDescription className="text-xs mt-1 leading-relaxed">
-                    {submissionNotice}
+              {serverError && (
+                <Alert variant="destructive" className="text-xs">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-xs font-semibold">Registration Failed</AlertTitle>
+                  <AlertDescription className="text-xs mt-1">{serverError}</AlertDescription>
+                </Alert>
+              )}
+
+              {fieldErrors.length > 0 && (
+                <Alert variant="destructive" className="text-xs">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-xs font-semibold">Validation Errors</AlertTitle>
+                  <AlertDescription className="text-xs mt-1">
+                    <ul className="list-disc list-inside space-y-0.5">
+                      {fieldErrors.map(e => (
+                        <li key={e.field}>{e.message}</li>
+                      ))}
+                    </ul>
                   </AlertDescription>
                 </Alert>
               )}
@@ -155,7 +179,7 @@ function RegisterFormContent() {
                       }`}
                     >
                       <span className="text-sm">Alumni Mentor</span>
-                      <span className="text-[11px] opacity-80 mt-0.5">Verified Graduate</span>
+                      <span className="text-[11px] opacity-80 mt-0.5">Graduate (Unverified)</span>
                     </button>
                   </div>
                   {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}

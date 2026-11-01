@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Verified Alumni Mentorship & Career Network | P11',
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full scroll-smooth">
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground antialiased selection:bg-primary/20">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -4,10 +4,23 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/layout/container';
-import { GraduationCap, Menu, X, ShieldCheck } from 'lucide-react';
+import { GraduationCap, Menu, X, ShieldCheck, LayoutDashboard, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const { user, isLoading, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+      setMobileMenuOpen(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
@@ -35,21 +48,21 @@ export function Navbar() {
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <Link
-              href="#how-it-works"
+              href="/#how-it-works"
               id="nav-link-how-it-works"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               How It Works
             </Link>
             <Link
-              href="#benefits"
+              href="/#benefits"
               id="nav-link-benefits"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               Programme Benefits
             </Link>
             <Link
-              href="#verification"
+              href="/#verification"
               id="nav-link-verification"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -59,14 +72,40 @@ export function Navbar() {
 
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center space-x-3">
-            <Link href="/login" id="nav-btn-login">
-              <Button variant="ghost" size="sm">
-                Log In
-              </Button>
-            </Link>
-            <Link href="/register" id="nav-btn-register">
-              <Button size="sm">Get Started</Button>
-            </Link>
+            {isLoading ? (
+              <div className="h-8 w-20 rounded-md bg-muted animate-pulse" />
+            ) : user ? (
+              <>
+                <Link href="/dashboard" id="nav-btn-dashboard">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  isLoading={isLoggingOut}
+                  className="gap-2"
+                  id="nav-btn-logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" id="nav-btn-login">
+                  <Button variant="ghost" size="sm">
+                    Log In
+                  </Button>
+                </Link>
+                <Link href="/register" id="nav-btn-register">
+                  <Button size="sm">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -88,21 +127,21 @@ export function Navbar() {
           <div className="md:hidden border-t py-4 space-y-3">
             <nav className="flex flex-col space-y-3 px-2">
               <Link
-                href="#how-it-works"
+                href="/#how-it-works"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground py-1"
               >
                 How It Works
               </Link>
               <Link
-                href="#benefits"
+                href="/#benefits"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground py-1"
               >
                 Programme Benefits
               </Link>
               <Link
-                href="#verification"
+                href="/#verification"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground py-1"
               >
@@ -110,14 +149,36 @@ export function Navbar() {
               </Link>
             </nav>
             <div className="flex flex-col space-y-2 pt-2 border-t px-2">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full justify-center">
-                  Log In
-                </Button>
-              </Link>
-              <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full justify-center">Get Started</Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full justify-center gap-2">
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center gap-2"
+                    onClick={handleLogout}
+                    isLoading={isLoggingOut}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full justify-center">
+                      Log In
+                    </Button>
+                  </Link>
+                  <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full justify-center">Get Started</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -207,8 +207,8 @@ Pino is configured with high-performance serialization and automated field maski
 |    Phase    | Milestone                         | Scope / Components                                                                                  |    Status    |
 | :---------: | :-------------------------------- | :-------------------------------------------------------------------------------------------------- | :----------: |
 | **Phase 1** | **Project Foundation**            | Monorepo structure, Express API, Next.js UI, security headers, health check, logging, documentation | **COMPLETE** |
-| **Phase 2** | **Authentication & RBAC**         | User model, JWT cookie sessions, bcrypt hashing, role authorization middleware                      |  _Upcoming_  |
-| **Phase 3** | **Alumni Verification (M1)**      | CSV/ERP graduate matching, manual review officer dashboard, verification status                     |  _Planned_   |
+| **Phase 2** | **Authentication & RBAC**         | User model, JWT cookie sessions, bcrypt hashing, role authorization middleware, AuthContext         | **COMPLETE** |
+| **Phase 3** | **Alumni Verification (M1)**      | CSV/ERP graduate matching, manual review officer dashboard, verification status                     |  _Upcoming_  |
 | **Phase 4** | **Profiles & Capacity (M2, M3)**  | Student career profiles, alumni capacity quotas, availability scheduling slots                      |  _Planned_   |
 | **Phase 5** | **Explainable Matching (M4)**     | Transparent rule-weighted scoring algorithm (no black-box AI), match explanations                   |  _Planned_   |
 | **Phase 6** | **Mentorship Workflows (M5, M6)** | Requests, acceptance/rejection, `.ics` calendar generation, session tracking                        |  _Planned_   |

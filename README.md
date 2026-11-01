@@ -1,6 +1,6 @@
 # P11 — Verified Alumni Mentorship Matching and Engagement Platform
 
-> **Phase 1: Project Foundation, Architecture, Security and Development Environment**
+> **Phase 2: Authentication, Authorization and User Management**
 
 An institutional web platform connecting university students with verified alumni for structured career guidance, transparent mentorship matching, and professional development.
 
@@ -81,6 +81,32 @@ npm run dev
 - **Frontend Application**: [http://localhost:3000](http://localhost:3000)
 - **Backend API Health Probe**: [http://localhost:5000/api/v1/health](http://localhost:5000/api/v1/health)
 - **Database Readiness Check**: [http://localhost:5000/api/v1/health/ready](http://localhost:5000/api/v1/health/ready)
+- **Auth Endpoints**:
+  - `POST /api/v1/auth/register` — Create student or alumni account
+  - `POST /api/v1/auth/login` — Sign in and receive HTTP-only session cookie
+  - `POST /api/v1/auth/logout` — Clear session cookie
+  - `GET /api/v1/auth/me` — Identify currently authenticated user
+
+---
+
+## 4. Roles, Registration & Security Rules
+
+| Role | Internal Value | Public Registration? | Responsibilities |
+| :--- | :--- | :---: | :--- |
+| Student | `student` | Yes | Discover mentors, apply for mentorship, track goals. |
+| Alumni / Mentor | `alumni` | Yes | Manage alumni profile, mentor students (requires verification in Phase 3). |
+| Alumni Relations Officer | `alumni_officer` | No (Admin only) | Verify alumni identities and match ERP records. |
+| Placement Officer | `placement_officer` | No (Admin only) | Read-only program participation and outcomes analytics. |
+| Administrator | `admin` | No (Internal) | User governance, platform configurations, security audits. |
+
+> [!IMPORTANT]
+> **Alumni Registration vs. Verification**: Self-registering as an `alumni` creates an account with status `active`, but **does NOT** grant verified mentor status. Verification is performed in Phase 3 by an Alumni Relations Officer.
+
+### Session & Cookie Security
+- Authentication tokens are signed with **HMAC-SHA256** and contain only the subject (`sub: userId`).
+- Role and account status are resolved dynamically from the database on every authenticated request, preventing stale privilege retention.
+- Session tokens are stored in an **HTTP-only**, **SameSite=Lax**, **Secure** (in production) cookie (`p11_auth_token`).
+- State-changing authentication requests validate the `Origin` / `Referer` headers against `CLIENT_URL` as a defense-in-depth CSRF measure.
 
 ---
 
@@ -224,8 +250,23 @@ All scripts are cross-platform and work seamlessly in Windows PowerShell and Com
 - [x] Vitest and Supertest testing suites for backend and frontend smoke test.
 - [x] System Architecture (`docs/ARCHITECTURE.md`) and setup documentation.
 
-### Upcoming in Phase 2:
+### Completed in Phase 2 (Authentication & Authorization):
 
-- [ ] User and Auth modules (Mongoose user schema, bcrypt password hashing).
-- [ ] Secure HTTP-only JWT cookie authentication and session lifecycle.
-- [ ] Role-based authorization middleware.
+- [x] User Mongoose model with email normalization, unique index, bcryptjs hashing ($12$ rounds), and safe DTO projections.
+- [x] Public registration strictly restricted to `student` and `alumni` roles (`POST /api/v1/auth/register`).
+- [x] Login with generic invalid-credentials response and account status checking (`POST /api/v1/auth/login`).
+- [x] Logout with matched cookie invalidation (`POST /api/v1/auth/logout`).
+- [x] Current session identification endpoint (`GET /api/v1/auth/me`).
+- [x] JWT sessions with HTTP-only, SameSite=Lax, Secure cookies (never stored in client storage).
+- [x] Origin/Referer header validation middleware as a CSRF defence layer for state-changing auth.
+- [x] `authenticate` and `requireRole` middleware attaching verified user to Express request.
+- [x] Frontend API client (`lib/api.ts`) with credential inclusion and typed error handling.
+- [x] React `AuthContext` provider handling session lifecycle and client-side auth state.
+- [x] Connected Login and Registration pages with live validation and error handling.
+- [x] Protected `/dashboard` placeholder with user identity and role-based badge.
+- [x] Authenticated state in responsive Navbar (Dashboard link, Logout action).
+- [x] Vitest test suites: 44 backend integration/unit tests + frontend component tests.
+
+### Upcoming in Phase 3:
+
+- [ ] Alumni verification workflow (ERP/CSV matching and officer review).

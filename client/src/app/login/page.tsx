@@ -18,20 +18,19 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Container } from '@/components/layout/container';
-import { GraduationCap, Lock, Mail, Info } from 'lucide-react';
+import { GraduationCap, Lock, Mail, AlertCircle } from 'lucide-react';
+import { useAuth, ApiError } from '@/contexts/AuthContext';
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Institutional email is required')
-    .email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
+  email: z.string().min(1, 'Email address is required').email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [submissionNotice, setSubmissionNotice] = React.useState<string | null>(null);
+  const { login } = useAuth();
+  const [serverError, setServerError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const {
@@ -40,24 +39,24 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = async (_data: LoginFormValues) => {
+  const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    setSubmissionNotice(null);
-
-    // Simulate standard asynchronous network validation
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setIsLoading(false);
-
-    // Phase 1 scope: Do not fake successful authentication
-    setSubmissionNotice(
-      'Phase 1 Architecture Check: Client form validation succeeded. Backend JWT authentication & session cookies will be active upon module implementation in Phase 2.'
-    );
+    setServerError(null);
+    try {
+      await login(data.email, data.password);
+      // Navigation to /dashboard is handled by AuthContext.login
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setServerError(err.message);
+      } else {
+        setServerError('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -82,13 +81,11 @@ export default function LoginPage() {
               <CardDescription>Enter your registered credentials to sign in</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {submissionNotice && (
-                <Alert variant="info" className="text-xs">
-                  <Info className="h-4 w-4" />
-                  <AlertTitle className="text-xs font-semibold">System Notice</AlertTitle>
-                  <AlertDescription className="text-xs mt-1 leading-relaxed">
-                    {submissionNotice}
-                  </AlertDescription>
+              {serverError && (
+                <Alert variant="destructive" className="text-xs">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-xs font-semibold">Sign In Failed</AlertTitle>
+                  <AlertDescription className="text-xs mt-1">{serverError}</AlertDescription>
                 </Alert>
               )}
 
@@ -121,9 +118,7 @@ export default function LoginPage() {
                     <Label htmlFor="password" required>
                       Password
                     </Label>
-                    <span className="text-xs text-muted-foreground hover:underline cursor-pointer">
-                      Forgot password?
-                    </span>
+                    <span className="text-xs text-muted-foreground">Forgot password?</span>
                   </div>
                   <div className="relative">
                     <Input
