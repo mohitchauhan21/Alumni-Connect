@@ -4,10 +4,10 @@
 **P11 — Verified Alumni Mentorship Matching and Engagement Platform**
 
 ## Current Phase
-**Phase 2 — Authentication, Authorization and User Management**
+**Phase 3 — Alumni Institutional Verification and Officer Workflow**
 
 ## Overall Phase Status
-🟢 **Phase 2 Complete**
+✅ **Phase 3 Completed**
 
 ---
 
@@ -29,95 +29,87 @@
 
 ## Phase 2 — Completed ✅
 
+- `User` Mongoose model with email normalization, unique index, bcryptjs hashing ($12$ rounds), password exclusion (`select: false`), and safe projection DTOs.
+- Public registration strictly restricted to `student` and `alumni` roles (`POST /api/v1/auth/register`).
+- Login with generic invalid-credentials response and account status checking (`POST /api/v1/auth/login`).
+- Logout with matched cookie invalidation (`POST /api/v1/auth/logout`).
+- Current session identification endpoint (`GET /api/v1/auth/me`).
+- JWT sessions with HTTP-only, SameSite=Lax, Secure cookies (`p11_auth_token`).
+- Origin/Referer header validation middleware as a CSRF defence layer.
+- `authenticate` and `requireRole` middleware attaching verified user to Express request.
+- Frontend API client (`lib/api.ts`) with credential inclusion and typed error handling.
+- React `AuthContext` provider handling session lifecycle and client-side auth state.
+- Connected Login and Registration pages with live validation and error handling.
+- Protected `/dashboard` placeholder with user identity and role-based badge.
+- Authenticated state in responsive Navbar (Dashboard link, Logout action, immediate rendering).
+- 44 server unit/integration tests and client component tests passing.
+
+---
+
+## Phase 3 — Completed ✅
+
 | # | Task | Status | Details |
 |---|------|:------:|---------|
-| T1 | Foundation inspection & tracking files | ✅ Done | Initialized `docs/PROGRESS.md` and `docs/PENDING.md`. |
-| T2 | User model, Zod schemas, safe serialization | ✅ Done | `User` Mongoose model with email normalization, unique index, bcryptjs hashing ($12$ rounds), password exclusion (`select: false`), and `toPublicUser` projection DTO. |
-| T3 | Authentication backend | ✅ Done | Implemented `register`, `login`, `logout`, and `getMe` controllers & services. Registered at `/api/v1/auth/*`. |
-| T4 | Auth middleware + RBAC + origin validation | ✅ Done | `authenticate` (JWT cookie verification + DB user status check), `requireRole` (strict authorization for 5 roles), `validateOrigin` (CSRF defense-in-depth). |
-| T5 | Frontend integration | ✅ Done | Reusable API client (`client/src/lib/api.ts`), centralized `AuthContext`, connected Login & Registration forms with validation & error banners, protected `/dashboard` placeholder with live user data, responsive auth-aware Navbar. |
-| T6 | Automated tests | ✅ Done | 44 backend integration and unit tests passing in Vitest (25 auth tests, 10 middleware/RBAC tests, 3 health tests, 3 error tests, 3 logger tests) + frontend RTL smoke tests. |
-| T7 | Final verification & documentation | ✅ Done | Typecheck (server + client), ESLint, Prettier, production builds (`build:server`, `build:client`), and documentation updated. |
+| T1 | Inspection & Planning | ✅ Done | Workspace, package dependencies (`multer`, `csv-parse`), and tracking initialized. |
+| T2 | Models: Verification, Records & Audit | ✅ Done | Created `AlumniVerification`, `InstitutionalAlumniRecord`, and `AuditLog` models, plus `audit.service.ts`. |
+| T3 | CSV Import Functionality | ✅ Done | In-memory upload middleware (`upload.ts`), header check, row validation, preview, confirmation, and idempotent upserts. |
+| T4 | Matching & Verification Services | ✅ Done | Deterministic matching engine (`matching.service.ts`), submission/resubmission lifecycle, concurrency-safe approval and rejection with audit events. |
+| T5 | Backend APIs & Audit Endpoints | ✅ Done | Verification router mounted at `/api/v1/verification/*` with Zod validation, role guards (`alumni`, `alumni_officer`, `admin`), and safe DTO projections. |
+| T6 | Frontend Implementation | ✅ Done | Created `/verification`, `/officer/verifications`, `/officer/verifications/import`, updated Navbar & Dashboard. |
+| T7 | Testing, Verification & Docs | ✅ Done | 63 backend integration tests + client tests passing, zero lint warnings, typechecks clean, docs updated. |
 
 ---
 
-## Important Implementation Decisions
-1. **JWT & Session Security**:
-   - Token payload is minimal: `{ sub: userId }`.
-   - Token is delivered strictly via `HttpOnly`, `SameSite=Lax`, `Path=/`, and `Secure` (production) cookie named `p11_auth_token`.
-   - Never stored in `localStorage`, `sessionStorage`, or JavaScript memory variables.
-2. **Dynamic Authorization**:
-   - User role and account status are resolved from MongoDB on each authenticated request.
-   - Prevents stale token escalation if a role is altered or an account is disabled/suspended.
-3. **Public Registration Restriction**:
-   - Only `student` and `alumni` roles are permitted in self-registration.
-   - Attempts to self-register as `alumni_officer`, `placement_officer`, or `admin` are rejected by backend Zod schemas with a `VALIDATION_ERROR` (HTTP 400).
-4. **Alumni Registration vs. Verification**:
-   - Registering as `alumni` activates the account for platform authentication, but **does not** mark the user as institutional verified alumni. Institutional verification is handled in Phase 3.
-5. **CSRF / Origin Validation**:
-   - State-changing authentication requests (`/register`, `/login`, `/logout`) validate `Origin` and `Referer` headers against `CLIENT_URL` in production.
-6. **Error Masking & Privacy**:
-   - Login uses a uniform generic error message ("Invalid email address or password") to eliminate email enumeration vectors.
-   - Duplicate key violations (MongoDB code 11000) are mapped to a clean HTTP 409 `EMAIL_ALREADY_EXISTS` without exposing database internals.
+## Important Architectural Decisions (Phase 3)
+1. **Decoupled Verification Lifecycle**:
+   - Verification status (`not_submitted`, `pending`, `verified`, `rejected`) is maintained in a dedicated `AlumniVerification` model rather than overloading the core `User` model.
+   - An alumnus account being `active` does not confer institutional verification; verification is earned only after officer approval against institutional evidence.
+2. **Deterministic Matching Engine**:
+   - Zero black-box AI or fuzzy heuristics. Matching strictly compares normalized `alumni_id` and normalized `institutional_email`, cross-checked with `fullName`, `programme`, `department`, and `graduation_year`.
+   - Matching states: `matched`, `unmatched`, `conflict`. Even a `matched` state requires manual review and sign-off by an authorized `alumni_officer` or `admin`.
+3. **Institutional Record Protection**:
+   - Official records (`InstitutionalAlumniRecord`) imported from university ERP/CSV are stored in an isolated collection.
+   - Public APIs never expose the institutional record catalog. Students and general alumni cannot access institutional master data.
+4. **Controlled Two-Step CSV Import**:
+   - Step 1: Preview without database mutation (validates headers, row counts, syntax, duplicates, conflicts).
+   - Step 2: Confirmation re-validates the payload and executes idempotent inserts/updates with audit logging.
+5. **Tamper-Evident Audit Trail**:
+   - Append-only `AuditLog` records every verification submission, resubmission, CSV import, approval, and rejection.
 
 ---
 
-## Files / Modules Created or Modified
-
-### Backend (`server/`)
-- `src/modules/auth/auth.types.ts`: Domain types (`UserRole`, `AccountStatus`, `PublicUser`, `JwtPayload`, `AuthenticatedUser`)
-- `src/modules/auth/user.model.ts`: Mongoose schema, bcrypt compare method, indices
-- `src/modules/auth/auth.schemas.ts`: Zod validation schemas for registration and login
-- `src/modules/auth/auth.service.ts`: Business logic for user creation, login, hashing, JWT signing/verification
-- `src/modules/auth/auth.controller.ts`: Express route handlers and cookie management
-- `src/modules/auth/auth.router.ts`: Express router for `/api/v1/auth`
-- `src/middleware/authenticate.ts`: JWT cookie parser and DB session validator
-- `src/middleware/requireRole.ts`: Multi-role RBAC authorization middleware
-- `src/middleware/validateOrigin.ts`: Origin/Referer header verification middleware
-- `src/types/express.d.ts`: Express `Request` type extension for `req.user`
-- `src/app.ts`: Mounted `authRouter` at `/api/v1/auth`
-- `tsconfig.json`: Added `src/types/**/*` to TypeScript include path
-- `tests/auth.test.ts`: 25 integration tests covering registration, login, logout, `/me`, and security
-- `tests/middleware.test.ts`: 10 unit tests for `authenticate` and `requireRole`
-
-### Frontend (`client/`)
-- `src/lib/api.ts`: Centralized fetch client with credentials, typed methods, and `ApiError`
-- `src/contexts/AuthContext.tsx`: React Context provider managing session lifecycle, login, register, and logout
-- `src/app/layout.tsx`: Wrapped application tree in `<AuthProvider>`
-- `src/app/login/page.tsx`: Integrated form submission with `AuthContext.login`, live validation, and error display
-- `src/app/register/page.tsx`: Integrated form submission with `AuthContext.register`, role selector, and validation
-- `src/app/dashboard/page.tsx`: Protected dashboard placeholder displaying user identity, role badge, and logout
-- `src/components/layout/navbar.tsx`: Responsive navigation reflecting authentication state
-
-### Documentation
-- `docs/PROGRESS.md`: Maintained persistent progress ledger
-- `docs/PENDING.md`: Maintained pending task ledger
-- `README.md`: Updated with Phase 2 capabilities, endpoints, roles, and setup
-- `docs/ARCHITECTURE.md`: Updated roadmap and auth architecture specifications
-
----
-
-## Verification & Checks Executed
-
-| Check | Workspace | Result |
-| :--- | :--- | :---: |
-| Server Tests (Vitest) | `server` | ✅ 44/44 passed |
-| Client Tests (Vitest + RTL) | `client` | ✅ 1/1 passed |
-| Server TypeScript Check (`tsc --noEmit`) | `server` | ✅ Clean (0 errors) |
-| Client TypeScript Check (`tsc --noEmit`) | `client` | ✅ Clean (0 errors) |
-| Server ESLint | `server` | ✅ Clean (0 warnings/errors) |
-| Client ESLint | `client` | ✅ Clean (0 warnings/errors) |
-| Prettier Formatting Check | Root (`monorepo`) | ✅ All files conform |
-| Server Production Build (`tsc`) | `server` | ✅ Dist emitted |
-| Client Production Build (`next build`) | `client` | ✅ Static & dynamic routes optimized |
+## Files / Modules Created or Modified (Phase 3)
+- `server/package.json`: Added `multer`, `csv-parse`, `@types/multer`
+- `server/src/modules/verification/verification.types.ts`: DTOs, Enums, Interfaces
+- `server/src/modules/verification/institutionalRecord.model.ts`: Authoritative institutional roster schema
+- `server/src/modules/verification/verification.model.ts`: Alumni verification lifecycle schema
+- `server/src/modules/audit/audit.model.ts`: Append-only audit trail schema
+- `server/src/modules/audit/audit.service.ts`: Structured audit logger
+- `server/src/modules/verification/csv.service.ts`: Streaming in-memory CSV parser, preview, and idempotent bulk upsert
+- `server/src/middleware/upload.ts`: Multer in-memory upload guard
+- `server/src/modules/verification/matching.service.ts`: Deterministic matching evaluation
+- `server/src/modules/verification/verification.service.ts`: Submission, officer queue, concurrency-safe approval, rejection, metrics
+- `server/src/modules/verification/verification.schemas.ts`: Zod validation schemas
+- `server/src/modules/verification/verification.controller.ts`: Express controllers
+- `server/src/modules/verification/verification.router.ts`: RBAC mounted endpoints at `/api/v1/verification`
+- `server/src/app.ts`: Mounted verification router
+- `server/tests/verification.test.ts`: Verification lifecycle, matching, and officer action integration tests
+- `server/tests/csvImport.test.ts`: CSV upload, preview, and confirm import integration tests
+- `client/src/lib/api.ts`: Phase 3 DTOs and API methods
+- `client/src/app/verification/page.tsx`: Alumni verification self-service portal
+- `client/src/app/officer/verifications/page.tsx`: Officer verification dashboard & side-by-side modal
+- `client/src/app/officer/verifications/import/page.tsx`: Officer roster CSV import page
+- `client/src/components/layout/navbar.tsx`: Role-based navigation links
+- `client/src/app/dashboard/page.tsx`: Role-specific action cards
+- `README.md`: Updated with Phase 3 endpoints, CSV spec, and role workflows
+- `docs/ARCHITECTURE.md`: Added Section 11 documenting Phase 3 architecture
+- `docs/PROGRESS.md`: Phase 3 tracking updated to complete
+- `docs/PENDING.md`: Phase 3 task breakdown marked done
 
 ---
 
 ## Last Completed Task
-**T7 — Final Verification and Documentation Update**
+**T7 — Testing, Verification & Documentation**
 
 ## Next Recommended Task
-**Phase 3: Alumni Institutional Verification & Officer Workflow**
-- Build alumni verification schema and database records.
-- Implement officer review dashboard for verifying graduation records against university registries.
-- Build verification status lifecycle (pending, verified, rejected).
+**Phase 4 — Student Career Profiles, Alumni Capacity Quotas & Availability**

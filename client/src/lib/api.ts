@@ -28,13 +28,21 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const isFormData = typeof FormData !== 'undefined' && init.body instanceof FormData;
+
+  const headers: Record<string, string> = {
+    ...(init.headers as Record<string, string> | undefined),
+  };
+
+  // If not FormData, default to application/json
+  if (!isFormData && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     credentials: 'include', // always send the HTTP-only auth cookie
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init.headers ?? {}),
-    },
+    headers,
   });
 
   const json = await res.json().catch(() => null);
@@ -52,7 +60,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return json as T;
 }
 
-// ── Auth endpoints ─────────────────────────────────────────────────────────
+// ── Auth Types & Endpoints ─────────────────────────────────────────────────
 
 export interface PublicUser {
   id: string;
@@ -109,4 +117,221 @@ export async function apiGetMe(): Promise<PublicUser | null> {
     }
     throw err;
   }
+}
+
+// ── Phase 3: Verification Types & Endpoints ────────────────────────────────
+
+export type VerificationStatus = 'pending' | 'verified' | 'rejected';
+export type MatchingResult = 'matched' | 'unmatched' | 'conflict';
+
+export interface AlumniVerificationDTO {
+  id: string;
+  alumniId: string;
+  institutionalEmail: string;
+  programme: string;
+  department: string;
+  graduationYear: number;
+  status: VerificationStatus;
+  matchingResult: MatchingResult;
+  submissionVersion: number;
+  submittedAt: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
+}
+
+export interface MatchingDetails {
+  matchedFields: string[];
+  conflictingFields: string[];
+  notes?: string;
+}
+
+export interface OfficerVerificationDetailDTO extends AlumniVerificationDTO {
+  userId: string;
+  applicantName: string;
+  applicantAccountEmail: string;
+  matchingDetails: MatchingDetails;
+  matchedRecord?: {
+    id: string;
+    alumniId: string;
+    fullName: string;
+    institutionalEmail: string;
+    programme: string;
+    department: string;
+    graduationYear: number;
+  } | null;
+  reviewedByOfficer?: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
+}
+
+export interface OfficerQueueItemDTO {
+  id: string;
+  userId: string;
+  applicantName: string;
+  applicantEmail: string;
+  alumniId: string;
+  programme: string;
+  department: string;
+  graduationYear: number;
+  status: VerificationStatus;
+  matchingResult: MatchingResult;
+  submissionVersion: number;
+  submittedAt: string;
+  reviewedAt?: string;
+}
+
+export interface VerificationMetricsDTO {
+  pendingCount: number;
+  verifiedCount: number;
+  rejectedCount: number;
+  totalRecordsCount: number;
+}
+
+export interface ValidatedInstitutionalRecord {
+  alumniId: string;
+  fullName: string;
+  institutionalEmail: string;
+  programme: string;
+  department: string;
+  graduationYear: number;
+}
+
+export interface RowValidationError {
+  rowNumber: number;
+  alumniId?: string;
+  reason: string;
+}
+
+export interface CsvImportPreviewDTO {
+  totalRows: number;
+  validRowsCount: number;
+  invalidRowsCount: number;
+  duplicateRowsCount: number;
+  existingConflictsCount: number;
+  previewRecords: ValidatedInstitutionalRecord[];
+  errors: RowValidationError[];
+}
+
+export interface CsvImportResultDTO {
+  batchId: string;
+  totalProcessed: number;
+  insertedCount: number;
+  updatedCount: number;
+  skippedCount: number;
+  failedCount: number;
+}
+
+export interface VerificationSubmitInput {
+  alumniId: string;
+  institutionalEmail: string;
+  programme: string;
+  department: string;
+  graduationYear: number;
+}
+
+export async function apiGetMyVerification(): Promise<AlumniVerificationDTO | null> {
+  const res = await request<{
+    success: boolean;
+    data: { verification: AlumniVerificationDTO | null };
+  }>('/verification/me');
+  return res.data.verification;
+}
+
+export async function apiSubmitVerification(
+  payload: VerificationSubmitInput
+): Promise<AlumniVerificationDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { verification: AlumniVerificationDTO };
+  }>('/verification/submit', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  return res.data.verification;
+}
+
+export async function apiGetOfficerMetrics(): Promise<VerificationMetricsDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { metrics: VerificationMetricsDTO };
+  }>('/verification/officer/metrics');
+  return res.data.metrics;
+}
+
+export async function apiGetOfficerQueue(params: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  matchingResult?: string;
+  search?: string;
+}): Promise<{ items: OfficerQueueItemDTO[]; total: number; page: number; totalPages: number }> {
+  const query = new URLSearchParams();
+  if (params.page) query.set('page', params.page.toString());
+  if (params.limit) query.set('limit', params.limit.toString());
+  if (params.status && params.status !== 'all') query.set('status', params.status);
+  if (params.matchingResult && params.matchingResult !== 'all')
+    query.set('matchingResult', params.matchingResult);
+  if (params.search) query.set('search', params.search);
+
+  const res = await request<{
+    success: boolean;
+    data: { items: OfficerQueueItemDTO[]; total: number; page: number; totalPages: number };
+  }>(`/verification/officer/queue?${query.toString()}`);
+  return res.data;
+}
+
+export async function apiGetVerificationDetail(id: string): Promise<OfficerVerificationDetailDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { verification: OfficerVerificationDetailDTO };
+  }>(`/verification/officer/${id}`);
+  return res.data.verification;
+}
+
+export async function apiApproveVerification(id: string): Promise<AlumniVerificationDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { verification: AlumniVerificationDTO };
+  }>(`/verification/officer/${id}/approve`, {
+    method: 'POST',
+  });
+  return res.data.verification;
+}
+
+export async function apiRejectVerification(
+  id: string,
+  reason: string
+): Promise<AlumniVerificationDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { verification: AlumniVerificationDTO };
+  }>(`/verification/officer/${id}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  });
+  return res.data.verification;
+}
+
+export async function apiPreviewCsvImport(formData: FormData): Promise<CsvImportPreviewDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { preview: CsvImportPreviewDTO };
+  }>('/verification/officer/records/import/preview', {
+    method: 'POST',
+    body: formData,
+  });
+  return res.data.preview;
+}
+
+export async function apiConfirmCsvImport(formData: FormData): Promise<CsvImportResultDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { result: CsvImportResultDTO };
+  }>('/verification/officer/records/import', {
+    method: 'POST',
+    body: formData,
+  });
+  return res.data.result;
 }

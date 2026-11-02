@@ -1,6 +1,6 @@
 # P11 — Verified Alumni Mentorship Matching and Engagement Platform
 
-> **Phase 2: Authentication, Authorization and User Management**
+> **Phase 3: Alumni Institutional Verification and Officer Workflow**
 
 An institutional web platform connecting university students with verified alumni for structured career guidance, transparent mentorship matching, and professional development.
 
@@ -86,6 +86,17 @@ npm run dev
   - `POST /api/v1/auth/login` — Sign in and receive HTTP-only session cookie
   - `POST /api/v1/auth/logout` — Clear session cookie
   - `GET /api/v1/auth/me` — Identify currently authenticated user
+- **Alumni Verification Endpoints**:
+  - `GET /api/v1/verification/me` — Retrieve current alumnus verification status
+  - `POST /api/v1/verification/submit` — Submit institutional credentials for matching
+- **Officer & Admin Verification Endpoints**:
+  - `GET /api/v1/verification/officer/metrics` — Aggregate counters (pending, verified, rejected)
+  - `GET /api/v1/verification/officer/queue` — Filterable, paginated verification review queue
+  - `GET /api/v1/verification/officer/:id` — Side-by-side evidence inspection
+  - `POST /api/v1/verification/officer/:id/approve` — Approve verified status & claim record
+  - `POST /api/v1/verification/officer/:id/reject` — Reject submission with mandatory audit reason
+  - `POST /api/v1/verification/officer/records/import/preview` — Non-mutating CSV preview
+  - `POST /api/v1/verification/officer/records/import` — Idempotent bulk upsert with audit log
 
 ---
 
@@ -267,6 +278,23 @@ All scripts are cross-platform and work seamlessly in Windows PowerShell and Com
 - [x] Authenticated state in responsive Navbar (Dashboard link, Logout action).
 - [x] Vitest test suites: 44 backend integration/unit tests + frontend component tests.
 
-### Upcoming in Phase 3:
+### Completed in Phase 3 (Institutional Verification & Officer Workflow):
 
-- [ ] Alumni verification workflow (ERP/CSV matching and officer review).
+- [x] Authoritative institutional roster schema (`InstitutionalAlumniRecord`) with normalized primary keys and claiming locks.
+- [x] Alumni verification lifecycle model (`AlumniVerification`) tracking states (`pending`, `verified`, `rejected`), versions, and history.
+- [x] Append-only audit logger (`AuditLog` and `audit.service.ts`) tracking all submissions, reviews, approvals, rejections, and imports.
+- [x] In-memory streaming CSV parser (`csv.service.ts`) with mandatory header enforcement, row validation, and duplicate detection.
+- [x] Two-step CSV import: non-mutating preview (`/records/import/preview`) and idempotent bulk upsert (`/records/import`).
+- [x] Deterministic matching engine (`matching.service.ts`) performing exact primary key matching and cross-field consistency checks.
+- [x] Concurrency-safe officer approval claiming official graduation records with race condition defense.
+- [x] Mandatory audit reason validation on rejection, re-enabling alumnus resubmission.
+- [x] Alumni Verification Portal (`/verification`) supporting submission, live state badges, resubmission on rejection, and verified status.
+- [x] Officer Review Dashboard (`/officer/verifications`) with metric counters, filterable/searchable queue, and side-by-side evidence inspection modal.
+- [x] Authoritative Roster Import Page (`/officer/verifications/import`) with drag-and-drop, sample format, preview metrics, row errors, and confirm import.
+- [x] Role-aware navigation links in Navbar and quick action cards in Dashboard.
+- [x] Comprehensive test suites: 63 backend integration/unit tests and client smoke tests passing.
+
+### Upcoming in Phase 4:
+
+- [ ] Student career profiles, target domains, and mentee preference collection.
+- [ ] Alumni mentor profiles, capacity controls, and topic availability.

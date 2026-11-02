@@ -2,13 +2,14 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Container } from '@/components/layout/container';
 import { Spinner } from '@/components/ui/spinner';
-import { GraduationCap, LogOut, LayoutDashboard } from 'lucide-react';
+import { GraduationCap, LogOut, LayoutDashboard, CheckCircle2, ShieldCheck, FileSpreadsheet, ArrowRight } from 'lucide-react';
 
 /** Human-readable role labels. */
 const ROLE_LABELS: Record<string, string> = {
@@ -122,26 +123,77 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Phase Placeholder */}
-          <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
-            <CardContent className="py-8 text-center space-y-3">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto">
-                <LayoutDashboard className="h-6 w-6" />
-              </div>
-              <h2 className="font-semibold text-foreground">Role-Specific Dashboard</h2>
-              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                The full{' '}
-                <span className="font-medium text-foreground">
-                  {ROLE_LABELS[user.role] ?? user.role}
-                </span>{' '}
-                dashboard — including mentorship matching, session scheduling, and programme
-                analytics — will be implemented in Phase 3 onwards.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Authentication and role assignment are fully operational.
-              </p>
-            </CardContent>
-          </Card>
+          {/* Phase 3 Action Cards */}
+          {user.role === 'alumni' && (
+            <Card className="border-primary/40 bg-card shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    Institutional Alumni Verification
+                  </span>
+                  <Badge variant="outline" className="text-xs font-semibold">Phase 3</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Verify your degree credentials against official institutional rosters to unlock mentor profiles, mentee capacity controls, and matching eligibility.
+                </p>
+                <div className="pt-2">
+                  <Link href="/verification">
+                    <Button size="sm" className="gap-2">
+                      Go to Verification Portal <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {(user.role === 'alumni_officer' || user.role === 'admin') && (
+            <Card className="border-primary/40 bg-card shadow-sm space-y-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                    Officer Verification Operations
+                  </span>
+                  <Badge variant="outline" className="text-xs font-semibold">Phase 3</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Review pending alumni verification submissions, evaluate matching results, and import official graduation roster CSV files.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/officer/verifications">
+                    <Button size="sm" className="gap-2">
+                      <ShieldCheck className="h-4 w-4" /> Open Verification Queue
+                    </Button>
+                  </Link>
+                  <Link href="/officer/verifications/import">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <FileSpreadsheet className="h-4 w-4" /> Import Roster CSV
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {user.role === 'student' && (
+            <Card className="border-border/80 bg-card shadow-sm">
+              <CardContent className="py-6 text-center space-y-2">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto">
+                  <LayoutDashboard className="h-5 w-5" />
+                </div>
+                <h2 className="font-semibold text-foreground">Student Mentorship Hub</h2>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  Career track selection, mentee preferences, and mentorship matching with verified alumni will be unlocked in Phase 4.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </Container>
     </div>

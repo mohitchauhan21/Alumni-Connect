@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/layout/container';
-import { GraduationCap, Menu, X, ShieldCheck, LayoutDashboard, LogOut } from 'lucide-react';
+import { GraduationCap, Menu, X, ShieldCheck, LayoutDashboard, LogOut, CheckCircle2, FileSpreadsheet } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Navbar() {
@@ -68,6 +68,39 @@ export function Navbar() {
             >
               Verification Standards
             </Link>
+
+            {/* Role-Specific Shortcuts */}
+            {user?.role === 'alumni' && (
+              <Link
+                href="/verification"
+                id="nav-link-alumni-verification"
+                className="text-primary font-semibold flex items-center gap-1.5 transition-colors hover:text-primary/80"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Get Verified
+              </Link>
+            )}
+
+            {(user?.role === 'alumni_officer' || user?.role === 'admin') && (
+              <>
+                <Link
+                  href="/officer/verifications"
+                  id="nav-link-officer-queue"
+                  className="text-primary font-semibold flex items-center gap-1.5 transition-colors hover:text-primary/80"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Review Queue
+                </Link>
+                <Link
+                  href="/officer/verifications/import"
+                  id="nav-link-officer-import"
+                  className="text-muted-foreground flex items-center gap-1.5 transition-colors hover:text-foreground"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  CSV Import
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Desktop Action Buttons */}
@@ -145,6 +178,38 @@ export function Navbar() {
               >
                 Verification Standards
               </Link>
+
+              {user?.role === 'alumni' && (
+                <Link
+                  href="/verification"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-semibold text-primary flex items-center gap-2 py-1"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Institutional Verification
+                </Link>
+              )}
+
+              {(user?.role === 'alumni_officer' || user?.role === 'admin') && (
+                <>
+                  <Link
+                    href="/officer/verifications"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-semibold text-primary flex items-center gap-2 py-1"
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                    Officer Review Queue
+                  </Link>
+                  <Link
+                    href="/officer/verifications/import"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 py-1"
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Roster CSV Import
+                  </Link>
+                </>
+              )}
             </nav>
             <div className="flex flex-col space-y-2 pt-2 border-t px-2">
               {user ? (

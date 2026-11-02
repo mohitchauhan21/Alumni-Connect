@@ -208,8 +208,44 @@ Pino is configured with high-performance serialization and automated field maski
 | :---------: | :-------------------------------- | :-------------------------------------------------------------------------------------------------- | :----------: |
 | **Phase 1** | **Project Foundation**            | Monorepo structure, Express API, Next.js UI, security headers, health check, logging, documentation | **COMPLETE** |
 | **Phase 2** | **Authentication & RBAC**         | User model, JWT cookie sessions, bcrypt hashing, role authorization middleware, AuthContext         | **COMPLETE** |
-| **Phase 3** | **Alumni Verification (M1)**      | CSV/ERP graduate matching, manual review officer dashboard, verification status                     |  _Upcoming_  |
+| **Phase 3** | **Alumni Verification (M1)**      | CSV/ERP graduate matching, manual review officer dashboard, verification status                     | **COMPLETE** |
 | **Phase 4** | **Profiles & Capacity (M2, M3)**  | Student career profiles, alumni capacity quotas, availability scheduling slots                      |  _Planned_   |
 | **Phase 5** | **Explainable Matching (M4)**     | Transparent rule-weighted scoring algorithm (no black-box AI), match explanations                   |  _Planned_   |
 | **Phase 6** | **Mentorship Workflows (M5, M6)** | Requests, acceptance/rejection, `.ics` calendar generation, session tracking                        |  _Planned_   |
 | **Phase 7** | **Goals & Analytics (M7, M10)**   | Milestones, action items, feedback rubrics, Placement Officer reporting                             |  _Planned_   |
+
+---
+
+## 11. Phase 3 Architecture: Institutional Verification & Officer Workflow
+
+### 11.1 Verification Lifecycle & State Machine
+Verification status is decoupled from the `User` account status (`active`, `disabled`, `suspended`):
+- `not_submitted`: Initial default for registered alumni.
+- `pending`: Submission received with deterministic matching executed; awaiting officer review.
+- `verified`: Approved by officer; locks official record claim and activates verified alumni features.
+- `rejected`: Rejected by officer with mandatory reason; alumnus may correct details and resubmit.
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotSubmitted
+    NotSubmitted --> Pending: Alumni submits credentials
+    Pending --> Verified: Officer approves match
+    Pending --> Rejected: Officer rejects with reason
+    Rejected --> Pending: Alumni resubmits corrected details
+    Verified --> [*]
+```
+
+### 11.2 Deterministic Matching Engine
+Zero black-box AI or LLM heuristics. Match evaluation is transparent and reproducible:
+1. Exact match on normalized primary key: `alumni_id` (`UPPERCASE`, trimmed).
+2. Primary identity consistency: normalized `institutional_email` (`lowercase`, trimmed).
+3. Cross-field consistency checks: `graduation_year` (exact integer), `programme`, `department`.
+4. Claim status check: prevents duplicate claims on the same institutional record.
+5. Matching outcomes: `matched`, `unmatched`, `conflict`. All outcomes require explicit officer review.
+
+### 11.3 Two-Stage CSV Import Pipeline
+1. **Preview (`/records/import/preview`)**: In-memory parsing via streaming `csv-parse`, strict lowercase header validation (`alumni_id,full_name,institutional_email,programme,department,graduation_year`), row formatting check, in-file duplicate detection, and non-mutating claim conflict detection against existing records.
+2. **Confirm (`/records/import`)**: Idempotent bulk upsert via `bulkWrite` using `$set` on details and `$setOnInsert` for claim state (`isClaimed: false`), preserving existing claimed associations.
+
+### 11.4 Append-Only Audit Trail
+Every verification lifecycle event (`VERIFICATION_SUBMITTED`, `VERIFICATION_RESUBMITTED`, `VERIFICATION_APPROVED`, `VERIFICATION_REJECTED`, `RECORDS_IMPORTED`) writes an unalterable log in `AuditLog` capturing actor ID, actor role, entity ID, request ID, timestamp, and metadata.
