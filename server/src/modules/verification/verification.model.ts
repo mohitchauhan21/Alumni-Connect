@@ -10,11 +10,7 @@
  */
 
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
-import type {
-  VerificationStatus,
-  MatchingResult,
-  MatchingDetails,
-} from './verification.types.js';
+import type { VerificationStatus, MatchingResult, MatchingDetails } from './verification.types.js';
 
 export interface IAlumniVerification extends Document {
   _id: Types.ObjectId;
@@ -134,6 +130,7 @@ alumniVerificationSchema.index({ status: 1, submittedAt: -1 });
 alumniVerificationSchema.index({ matchedRecordId: 1 });
 alumniVerificationSchema.index({ alumniId: 1 });
 
-export const AlumniVerification: Model<IAlumniVerification> =
-  mongoose.model<IAlumniVerification>('AlumniVerification', alumniVerificationSchema);
-
+export const AlumniVerification: Model<IAlumniVerification> = mongoose.model<IAlumniVerification>(
+  'AlumniVerification',
+  alumniVerificationSchema
+);

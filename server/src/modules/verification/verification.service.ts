@@ -205,7 +205,9 @@ export async function getOfficerVerificationQueue(params: {
 
   const queueItems: OfficerQueueItemDTO[] = items.map(doc => ({
     id: doc._id.toString(),
-    userId: doc.userId ? (doc.userId as unknown as { _id: Types.ObjectId })._id?.toString() || '' : '',
+    userId: doc.userId
+      ? (doc.userId as unknown as { _id: Types.ObjectId })._id?.toString() || ''
+      : '',
     applicantName: doc.userId ? doc.userId.fullName : 'Unknown Applicant',
     applicantEmail: doc.userId ? doc.userId.email : '',
     alumniId: doc.alumniId,
@@ -256,7 +258,9 @@ export async function getVerificationDetailForOfficer(
 
   return {
     ...base,
-    userId: doc.userId ? (doc.userId as unknown as { _id: Types.ObjectId })._id?.toString() || '' : '',
+    userId: doc.userId
+      ? (doc.userId as unknown as { _id: Types.ObjectId })._id?.toString() || ''
+      : '',
     applicantName: doc.userId ? doc.userId.fullName : 'Unknown Applicant',
     applicantAccountEmail: doc.userId ? doc.userId.email : '',
     matchingDetails: doc.matchingDetails,

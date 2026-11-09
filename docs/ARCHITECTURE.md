@@ -209,7 +209,7 @@ Pino is configured with high-performance serialization and automated field maski
 | **Phase 1** | **Project Foundation**            | Monorepo structure, Express API, Next.js UI, security headers, health check, logging, documentation | **COMPLETE** |
 | **Phase 2** | **Authentication & RBAC**         | User model, JWT cookie sessions, bcrypt hashing, role authorization middleware, AuthContext         | **COMPLETE** |
 | **Phase 3** | **Alumni Verification (M1)**      | CSV/ERP graduate matching, manual review officer dashboard, verification status                     | **COMPLETE** |
-| **Phase 4** | **Profiles & Capacity (M2, M3)**  | Student career profiles, alumni capacity quotas, availability scheduling slots                      |  _Planned_   |
+| **Phase 4** | **Profiles & Mentorship Offerings** | Student academic/career profiles, verified alumni professional profiles, offerings & discovery | **COMPLETE** |
 | **Phase 5** | **Explainable Matching (M4)**     | Transparent rule-weighted scoring algorithm (no black-box AI), match explanations                   |  _Planned_   |
 | **Phase 6** | **Mentorship Workflows (M5, M6)** | Requests, acceptance/rejection, `.ics` calendar generation, session tracking                        |  _Planned_   |
 | **Phase 7** | **Goals & Analytics (M7, M10)**   | Milestones, action items, feedback rubrics, Placement Officer reporting                             |  _Planned_   |
@@ -219,7 +219,9 @@ Pino is configured with high-performance serialization and automated field maski
 ## 11. Phase 3 Architecture: Institutional Verification & Officer Workflow
 
 ### 11.1 Verification Lifecycle & State Machine
+
 Verification status is decoupled from the `User` account status (`active`, `disabled`, `suspended`):
+
 - `not_submitted`: Initial default for registered alumni.
 - `pending`: Submission received with deterministic matching executed; awaiting officer review.
 - `verified`: Approved by officer; locks official record claim and activates verified alumni features.
@@ -236,7 +238,9 @@ stateDiagram-v2
 ```
 
 ### 11.2 Deterministic Matching Engine
+
 Zero black-box AI or LLM heuristics. Match evaluation is transparent and reproducible:
+
 1. Exact match on normalized primary key: `alumni_id` (`UPPERCASE`, trimmed).
 2. Primary identity consistency: normalized `institutional_email` (`lowercase`, trimmed).
 3. Cross-field consistency checks: `graduation_year` (exact integer), `programme`, `department`.
@@ -244,8 +248,41 @@ Zero black-box AI or LLM heuristics. Match evaluation is transparent and reprodu
 5. Matching outcomes: `matched`, `unmatched`, `conflict`. All outcomes require explicit officer review.
 
 ### 11.3 Two-Stage CSV Import Pipeline
+
 1. **Preview (`/records/import/preview`)**: In-memory parsing via streaming `csv-parse`, strict lowercase header validation (`alumni_id,full_name,institutional_email,programme,department,graduation_year`), row formatting check, in-file duplicate detection, and non-mutating claim conflict detection against existing records.
 2. **Confirm (`/records/import`)**: Idempotent bulk upsert via `bulkWrite` using `$set` on details and `$setOnInsert` for claim state (`isClaimed: false`), preserving existing claimed associations.
 
 ### 11.4 Append-Only Audit Trail
+
 Every verification lifecycle event (`VERIFICATION_SUBMITTED`, `VERIFICATION_RESUBMITTED`, `VERIFICATION_APPROVED`, `VERIFICATION_REJECTED`, `RECORDS_IMPORTED`) writes an unalterable log in `AuditLog` capturing actor ID, actor role, entity ID, request ID, timestamp, and metadata.
+
+---
+
+## 12. Phase 4 Architecture: Profiles, Mentorship Offerings & Discovery
+
+### 12.1 Student Profile Management
+- **Model**: `StudentProfile` (`userId` unique index).
+- **Academic & Career Fields**: Programme, department, graduation year, academic interests, technical/professional skills, career interests, career goals, mentorship topics, preferred mode (`online`, `in-person`, `hybrid`), and short bio.
+- **Dynamic Completion Calculation**: Evaluated strictly on the backend across 4 categories (Academic identity: 30%, Skills & Interests: 30%, Goals & Bio: 20%, Mentorship Preferences: 20%). Returned dynamically with `GET /api/v1/profiles/me`.
+
+### 12.2 Alumni Professional Profile Management
+- **Model**: `AlumniProfile` (`userId` unique index).
+- **Professional Identity**: Professional headline, current designation, company, industry domain, years of experience, bio, skills, areas of expertise, mentorship topics, preferred modes, draft state (`isDraft`), and public visibility (`isPubliclyVisible`).
+- **Institutional Immutability**: Degree credentials (`alumniId`, `institutionalEmail`, `programme`, `department`, `graduationYear`) are projected as read-only from the approved `AlumniVerification` record. Alumni cannot modify official degree records.
+- **Publishing Guard**: An alumnus cannot publish (`isDraft: false` or `isPubliclyVisible: true`) unless their `AlumniVerification.status === 'verified'` and `User.accountStatus === 'active'`.
+
+### 12.3 Mentorship Offer Creation & Lifecycle
+- **Model**: `MentorshipOffer` (compound discovery indexes: `status`, `isDeleted`, `alumniId`, `topics`, `mode`).
+- **Offering Schema**: Title, description, topics, target audience, session mode (`online`, `in-person`, `hybrid`), duration (15–180 minutes), and monthly mentee capacity limit.
+- **Lifecycle & Soft Deletion**: Offerings can transition between `active`, `paused`, and `closed`. Deletion is strictly soft (`isDeleted: true`), preserving historical auditability and preventing orphan references.
+- **Alumni Ownership & Guard**: Only verified active alumni can create or modify offerings; ownership is verified prior to update or deletion.
+
+### 12.4 Mentorship Discovery Engine
+- **Endpoint**: `GET /api/v1/mentorship/offers` (available to all authenticated users).
+- **Strict Discovery Criteria**: Offers must satisfy:
+  1. `MentorshipOffer.isDeleted === false` and `MentorshipOffer.status === 'active'`.
+  2. `AlumniProfile.isDraft === false` and `AlumniProfile.isPubliclyVisible === true`.
+  3. `AlumniVerification.status === 'verified'`.
+  4. `User.accountStatus === 'active'`.
+- **Search & Filtering**: Keyword search across title, description, and topics with regex sanitization; filtering by topic, industry, and session mode; standard backend pagination (`page`, `limit`, `totalPages`, `totalCount`).
+

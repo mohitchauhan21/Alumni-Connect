@@ -335,3 +335,235 @@ export async function apiConfirmCsvImport(formData: FormData): Promise<CsvImport
   });
   return res.data.result;
 }
+
+// ── Phase 4: Profile & Mentorship Types & APIs ──────────────────────────────
+
+export type MentorshipMode = 'online' | 'in-person' | 'hybrid';
+export type OfferingStatus = 'draft' | 'active' | 'inactive';
+
+export interface StudentProfileDTO {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  programme: string;
+  department: string;
+  graduationYear: number;
+  academicInterests: string[];
+  skills: string[];
+  careerInterests: string[];
+  careerGoals: string;
+  preferredMentorshipTopics: string[];
+  preferredMentorshipMode: MentorshipMode;
+  bio: string;
+  completionPercentage: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AlumniProfileDTO {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  alumniId?: string;
+  institutionalEmail?: string;
+  programme?: string;
+  department?: string;
+  graduationYear?: number;
+  isVerified: boolean;
+  headline: string;
+  currentDesignation: string;
+  company: string;
+  industry: string;
+  yearsOfExperience: number;
+  bio: string;
+  skills: string[];
+  areasOfExpertise: string[];
+  mentorshipTopics: string[];
+  languages: string[];
+  preferredMentorshipMode: MentorshipMode;
+  isPubliclyVisible: boolean;
+  isDraft: boolean;
+  completionPercentage: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicAlumniProfileDTO {
+  id: string;
+  userId: string;
+  fullName: string;
+  programme: string;
+  department: string;
+  graduationYear: number;
+  isVerified: boolean;
+  headline: string;
+  currentDesignation: string;
+  company: string;
+  industry: string;
+  yearsOfExperience: number;
+  bio: string;
+  skills: string[];
+  areasOfExpertise: string[];
+  mentorshipTopics: string[];
+  languages: string[];
+  preferredMentorshipMode: MentorshipMode;
+}
+
+export interface MentorshipOfferDTO {
+  id: string;
+  alumniId: string;
+  title: string;
+  description: string;
+  topics: string[];
+  targetAudience: string;
+  mode: MentorshipMode;
+  sessionDurationMinutes: number;
+  maxMenteesCapacity: number;
+  status: OfferingStatus;
+  createdAt: string;
+  updatedAt: string;
+  alumni?: PublicAlumniProfileDTO;
+}
+
+export interface PaginatedMentorshipOffersDTO {
+  items: MentorshipOfferDTO[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export async function apiGetMyProfile(): Promise<
+  | { role: 'student'; profile: StudentProfileDTO }
+  | { role: 'alumni'; profile: AlumniProfileDTO }
+  | { role: string; profile: any }
+> {
+  const res = await request<{
+    success: boolean;
+    data:
+      | { role: 'student'; profile: StudentProfileDTO }
+      | { role: 'alumni'; profile: AlumniProfileDTO }
+      | { role: string; profile: any };
+  }>('/profiles/me');
+  return res.data;
+}
+
+export async function apiUpdateMyProfile(
+  data: any
+): Promise<
+  | { role: 'student'; profile: StudentProfileDTO }
+  | { role: 'alumni'; profile: AlumniProfileDTO }
+  | { role: string; profile: any }
+> {
+  const res = await request<{
+    success: boolean;
+    data:
+      | { role: 'student'; profile: StudentProfileDTO }
+      | { role: 'alumni'; profile: AlumniProfileDTO }
+      | { role: string; profile: any };
+  }>('/profiles/me', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  return res.data;
+}
+
+export async function apiGetPublicAlumniProfile(userId: string): Promise<PublicAlumniProfileDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { profile: PublicAlumniProfileDTO };
+  }>(`/profiles/alumni/${userId}`);
+  return res.data.profile;
+}
+
+export async function apiCreateMentorshipOffer(data: {
+  title: string;
+  description: string;
+  topics: string[];
+  targetAudience: string;
+  mode: MentorshipMode;
+  sessionDurationMinutes: number;
+  maxMenteesCapacity: number;
+  status?: OfferingStatus;
+}): Promise<MentorshipOfferDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { offer: MentorshipOfferDTO };
+  }>('/mentorship/offers', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  return res.data.offer;
+}
+
+export async function apiGetMyMentorshipOffers(): Promise<MentorshipOfferDTO[]> {
+  const res = await request<{
+    success: boolean;
+    data: { offers: MentorshipOfferDTO[] };
+  }>('/mentorship/offers/mine');
+  return res.data.offers;
+}
+
+export async function apiGetMentorshipOffer(id: string): Promise<MentorshipOfferDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { offer: MentorshipOfferDTO };
+  }>(`/mentorship/offers/${id}`);
+  return res.data.offer;
+}
+
+export async function apiUpdateMentorshipOffer(
+  id: string,
+  data: Partial<{
+    title: string;
+    description: string;
+    topics: string[];
+    targetAudience: string;
+    mode: MentorshipMode;
+    sessionDurationMinutes: number;
+    maxMenteesCapacity: number;
+    status: OfferingStatus;
+  }>
+): Promise<MentorshipOfferDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { offer: MentorshipOfferDTO };
+  }>(`/mentorship/offers/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  return res.data.offer;
+}
+
+export async function apiDeleteMentorshipOffer(id: string): Promise<void> {
+  await request<{
+    success: boolean;
+    data: { message: string };
+  }>(`/mentorship/offers/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function apiDiscoverMentorshipOffers(query: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  topic?: string;
+  industry?: string;
+  mode?: string;
+}): Promise<PaginatedMentorshipOffersDTO> {
+  const searchParams = new URLSearchParams();
+  if (query.page) searchParams.set('page', query.page.toString());
+  if (query.limit) searchParams.set('limit', query.limit.toString());
+  if (query.search) searchParams.set('search', query.search);
+  if (query.topic && query.topic !== 'all') searchParams.set('topic', query.topic);
+  if (query.industry && query.industry !== 'all') searchParams.set('industry', query.industry);
+  if (query.mode && query.mode !== 'all') searchParams.set('mode', query.mode);
+
+  const res = await request<{
+    success: boolean;
+    data: PaginatedMentorshipOffersDTO;
+  }>(`/mentorship/offers?${searchParams.toString()}`);
+  return res.data;
+}

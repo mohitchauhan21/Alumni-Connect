@@ -103,4 +103,3 @@ export const InstitutionalAlumniRecord: Model<IInstitutionalAlumniRecord> =
     'InstitutionalAlumniRecord',
     institutionalRecordSchema
   );
-

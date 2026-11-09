@@ -1,13 +1,16 @@
 # P11 — Verified Alumni Mentorship Platform: Progress Tracker
 
 ## Project
+
 **P11 — Verified Alumni Mentorship Matching and Engagement Platform**
 
 ## Current Phase
-**Phase 3 — Alumni Institutional Verification and Officer Workflow**
+
+**Phase 4 — Student & Alumni Profiles and Mentorship Offerings**
 
 ## Overall Phase Status
-✅ **Phase 3 Completed**
+
+✅ **Phase 4 Completed & Verified (All 7 Tasks T1–T7 passing)**
 
 ---
 
@@ -29,7 +32,7 @@
 
 ## Phase 2 — Completed ✅
 
-- `User` Mongoose model with email normalization, unique index, bcryptjs hashing ($12$ rounds), password exclusion (`select: false`), and safe projection DTOs.
+- `User` Mongoose model with email normalization, unique index, bcryptjs hashing ($12$ rounds), and safe projection DTOs.
 - Public registration strictly restricted to `student` and `alumni` roles (`POST /api/v1/auth/register`).
 - Login with generic invalid-credentials response and account status checking (`POST /api/v1/auth/login`).
 - Logout with matched cookie invalidation (`POST /api/v1/auth/logout`).
@@ -48,68 +51,58 @@
 
 ## Phase 3 — Completed ✅
 
-| # | Task | Status | Details |
-|---|------|:------:|---------|
-| T1 | Inspection & Planning | ✅ Done | Workspace, package dependencies (`multer`, `csv-parse`), and tracking initialized. |
-| T2 | Models: Verification, Records & Audit | ✅ Done | Created `AlumniVerification`, `InstitutionalAlumniRecord`, and `AuditLog` models, plus `audit.service.ts`. |
-| T3 | CSV Import Functionality | ✅ Done | In-memory upload middleware (`upload.ts`), header check, row validation, preview, confirmation, and idempotent upserts. |
-| T4 | Matching & Verification Services | ✅ Done | Deterministic matching engine (`matching.service.ts`), submission/resubmission lifecycle, concurrency-safe approval and rejection with audit events. |
-| T5 | Backend APIs & Audit Endpoints | ✅ Done | Verification router mounted at `/api/v1/verification/*` with Zod validation, role guards (`alumni`, `alumni_officer`, `admin`), and safe DTO projections. |
-| T6 | Frontend Implementation | ✅ Done | Created `/verification`, `/officer/verifications`, `/officer/verifications/import`, updated Navbar & Dashboard. |
-| T7 | Testing, Verification & Docs | ✅ Done | 63 backend integration tests + client tests passing, zero lint warnings, typechecks clean, docs updated. |
+- Authoritative institutional roster schema (`InstitutionalAlumniRecord`) with normalized primary keys and claiming locks.
+- Alumni verification lifecycle model (`AlumniVerification`) tracking states (`pending`, `verified`, `rejected`), versions, and history.
+- Append-only audit logger (`AuditLog` and `audit.service.ts`) tracking all submissions, reviews, approvals, rejections, and imports.
+- In-memory streaming CSV parser (`csv.service.ts`) with mandatory header enforcement, row validation, and duplicate detection.
+- Two-step CSV import: non-mutating preview (`/records/import/preview`) and idempotent bulk upsert (`/records/import`).
+- Deterministic matching engine (`matching.service.ts`) performing exact primary key matching and cross-field consistency checks.
+- Concurrency-safe officer approval claiming official graduation records with race condition defense.
+- Mandatory audit reason validation on rejection, re-enabling alumnus resubmission.
+- Alumni Verification Portal (`/verification`) supporting submission, live state badges, resubmission on rejection, and verified status.
+- Officer Review Dashboard (`/officer/verifications`) with metric counters, filterable/searchable queue, and side-by-side evidence inspection modal.
+- Authoritative Roster Import Page (`/officer/verifications/import`) with drag-and-drop, sample format, preview metrics, row errors, and confirm import.
+- Role-aware navigation links in Navbar and quick action cards in Dashboard.
+- 63 backend integration/unit tests and client smoke tests passing.
 
 ---
 
-## Important Architectural Decisions (Phase 3)
-1. **Decoupled Verification Lifecycle**:
-   - Verification status (`not_submitted`, `pending`, `verified`, `rejected`) is maintained in a dedicated `AlumniVerification` model rather than overloading the core `User` model.
-   - An alumnus account being `active` does not confer institutional verification; verification is earned only after officer approval against institutional evidence.
-2. **Deterministic Matching Engine**:
-   - Zero black-box AI or fuzzy heuristics. Matching strictly compares normalized `alumni_id` and normalized `institutional_email`, cross-checked with `fullName`, `programme`, `department`, and `graduation_year`.
-   - Matching states: `matched`, `unmatched`, `conflict`. Even a `matched` state requires manual review and sign-off by an authorized `alumni_officer` or `admin`.
-3. **Institutional Record Protection**:
-   - Official records (`InstitutionalAlumniRecord`) imported from university ERP/CSV are stored in an isolated collection.
-   - Public APIs never expose the institutional record catalog. Students and general alumni cannot access institutional master data.
-4. **Controlled Two-Step CSV Import**:
-   - Step 1: Preview without database mutation (validates headers, row counts, syntax, duplicates, conflicts).
-   - Step 2: Confirmation re-validates the payload and executes idempotent inserts/updates with audit logging.
-5. **Tamper-Evident Audit Trail**:
-   - Append-only `AuditLog` records every verification submission, resubmission, CSV import, approval, and rejection.
+## Phase 4 — Completed ✅
+
+| #   | Task                                | Status  | Details                                                                                        |
+| --- | ----------------------------------- | :-----: | ---------------------------------------------------------------------------------------------- |
+| T1  | Existing Codebase Review & Planning | ✅ Done | Inspected existing schemas, auth guards, verified data flows, planned models and APIs.         |
+| T2  | Database Models & Backend Services  | ✅ Done | Created `StudentProfile`, `AlumniProfile`, and `MentorshipOffer` models, types, and services.  |
+| T3  | Profile APIs                        | ✅ Done | `/api/v1/profiles/me` (GET/PATCH) and `/api/v1/profiles/alumni/:userId` (GET).                 |
+| T4  | Mentorship Offering Management APIs | ✅ Done | `/api/v1/mentorship/offers` (POST), `/mine` (GET), `/:id` (GET/PATCH/DELETE).                  |
+| T5  | Discovery APIs                      | ✅ Done | `/api/v1/mentorship/offers` (GET) with search, filter, and pagination.                         |
+| T6  | Frontend Implementation             | ✅ Done | Student profile, alumni profile, offer management, discovery, and dashboard/navbar updates.    |
+| T7  | Testing, Verification & Docs        | ✅ Done | Vitest (79 server tests, 3 client tests), TypeScript typecheck, ESLint, Prettier, Next.js build.|
 
 ---
 
-## Files / Modules Created or Modified (Phase 3)
-- `server/package.json`: Added `multer`, `csv-parse`, `@types/multer`
-- `server/src/modules/verification/verification.types.ts`: DTOs, Enums, Interfaces
-- `server/src/modules/verification/institutionalRecord.model.ts`: Authoritative institutional roster schema
-- `server/src/modules/verification/verification.model.ts`: Alumni verification lifecycle schema
-- `server/src/modules/audit/audit.model.ts`: Append-only audit trail schema
-- `server/src/modules/audit/audit.service.ts`: Structured audit logger
-- `server/src/modules/verification/csv.service.ts`: Streaming in-memory CSV parser, preview, and idempotent bulk upsert
-- `server/src/middleware/upload.ts`: Multer in-memory upload guard
-- `server/src/modules/verification/matching.service.ts`: Deterministic matching evaluation
-- `server/src/modules/verification/verification.service.ts`: Submission, officer queue, concurrency-safe approval, rejection, metrics
-- `server/src/modules/verification/verification.schemas.ts`: Zod validation schemas
-- `server/src/modules/verification/verification.controller.ts`: Express controllers
-- `server/src/modules/verification/verification.router.ts`: RBAC mounted endpoints at `/api/v1/verification`
-- `server/src/app.ts`: Mounted verification router
-- `server/tests/verification.test.ts`: Verification lifecycle, matching, and officer action integration tests
-- `server/tests/csvImport.test.ts`: CSV upload, preview, and confirm import integration tests
-- `client/src/lib/api.ts`: Phase 3 DTOs and API methods
-- `client/src/app/verification/page.tsx`: Alumni verification self-service portal
-- `client/src/app/officer/verifications/page.tsx`: Officer verification dashboard & side-by-side modal
-- `client/src/app/officer/verifications/import/page.tsx`: Officer roster CSV import page
-- `client/src/components/layout/navbar.tsx`: Role-based navigation links
-- `client/src/app/dashboard/page.tsx`: Role-specific action cards
-- `README.md`: Updated with Phase 3 endpoints, CSV spec, and role workflows
-- `docs/ARCHITECTURE.md`: Added Section 11 documenting Phase 3 architecture
-- `docs/PROGRESS.md`: Phase 3 tracking updated to complete
-- `docs/PENDING.md`: Phase 3 task breakdown marked done
+## Important Architectural Decisions (Phase 4)
+
+1. **Institutional Data Immutability**:
+   - Institutional graduation credentials (`alumniId`, `institutionalEmail`, `programme`, `department`, `graduationYear`) remain solely sourced from the verified `AlumniVerification` record.
+   - Profile endpoints never overwrite or duplicate verified institutional data.
+2. **Server-Side Profile Completion Calculation**:
+   - Profile completion percentage is calculated objectively on the backend across 4 categories: Academic (30%), Skills & Interests (30%), Career Goals & Bio (20%), and Mentorship Preferences (20%).
+   - Frontend-submitted percentages are never trusted.
+3. **Draft vs. Published Verification Guards**:
+   - Alumni can save profiles as draft.
+   - Publishing (`isPubliclyVisible: true`, `isDraft: false`) or creating an active `MentorshipOffer` strictly checks that `AlumniVerification.status === 'verified'` and `User.accountStatus === 'active'`.
+4. **Soft Deletion for Offerings**:
+   - Offerings use `isDeleted: true` to preserve historic integrity for future phase mentorship request records.
+5. **Strict Discovery Filtering**:
+   - Search and discovery queries only expose offerings where `status === 'active'`, `isDeleted === false`, and the offering's alumnus is actively verified and has a publicly visible profile.
 
 ---
 
 ## Last Completed Task
+
 **T7 — Testing, Verification & Documentation**
 
-## Next Recommended Task
-**Phase 4 — Student Career Profiles, Alumni Capacity Quotas & Availability**
+## Next Phase
+
+**Phase 5 — Explainable Matching Engine (Rule-weighted scoring without black-box AI)**

@@ -124,9 +124,9 @@ export async function evaluateInstitutionalMatch(
     details: {
       matchedFields,
       conflictingFields: [],
-      notes: 'All primary identity credentials and institutional cross-checks match official university registry.',
+      notes:
+        'All primary identity credentials and institutional cross-checks match official university registry.',
     },
     matchedRecord: candidateRecord,
   };
 }
-

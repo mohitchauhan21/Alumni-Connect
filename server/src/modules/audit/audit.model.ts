@@ -73,8 +73,4 @@ const auditLogSchema = new Schema<IAuditLog>(
 auditLogSchema.index({ entityType: 1, entityId: 1, timestamp: -1 });
 auditLogSchema.index({ actorId: 1, timestamp: -1 });
 
-export const AuditLog: Model<IAuditLog> = mongoose.model<IAuditLog>(
-  'AuditLog',
-  auditLogSchema
-);
-
+export const AuditLog: Model<IAuditLog> = mongoose.model<IAuditLog>('AuditLog', auditLogSchema);

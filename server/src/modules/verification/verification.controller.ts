@@ -73,11 +73,7 @@ export async function submit(req: Request, res: Response, next: NextFunction): P
  * GET /api/v1/verification/officer/metrics
  * Overview counters for officer dashboard.
  */
-export async function getMetrics(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function getMetrics(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const metrics = await getVerificationMetrics();
     res.status(200).json({

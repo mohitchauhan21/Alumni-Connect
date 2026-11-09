@@ -41,4 +41,3 @@ export async function createAuditEntry(input: CreateAuditEntryInput): Promise<vo
     );
   }
 }
-

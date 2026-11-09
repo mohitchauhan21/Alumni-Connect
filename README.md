@@ -89,6 +89,17 @@ npm run dev
 - **Alumni Verification Endpoints**:
   - `GET /api/v1/verification/me` — Retrieve current alumnus verification status
   - `POST /api/v1/verification/submit` — Submit institutional credentials for matching
+- **Profile Endpoints**:
+  - `GET /api/v1/profiles/me` — Retrieve own profile with calculated completion percentage
+  - `PATCH /api/v1/profiles/me` — Update student or alumni profile details
+  - `GET /api/v1/profiles/alumni/:userId` — View public profile of a verified alumnus
+- **Mentorship Offering Endpoints**:
+  - `POST /api/v1/mentorship/offers` — Create mentorship offering (verified alumni only)
+  - `GET /api/v1/mentorship/offers/mine` — Retrieve all offerings owned by the authenticated alumnus
+  - `GET /api/v1/mentorship/offers` — Discover active offerings with search, filters, and pagination
+  - `GET /api/v1/mentorship/offers/:id` — View details of a specific mentorship offering
+  - `PATCH /api/v1/mentorship/offers/:id` — Update mentorship offering (owner only)
+  - `DELETE /api/v1/mentorship/offers/:id` — Soft-delete mentorship offering (owner only)
 - **Officer & Admin Verification Endpoints**:
   - `GET /api/v1/verification/officer/metrics` — Aggregate counters (pending, verified, rejected)
   - `GET /api/v1/verification/officer/queue` — Filterable, paginated verification review queue
@@ -102,18 +113,19 @@ npm run dev
 
 ## 4. Roles, Registration & Security Rules
 
-| Role | Internal Value | Public Registration? | Responsibilities |
-| :--- | :--- | :---: | :--- |
-| Student | `student` | Yes | Discover mentors, apply for mentorship, track goals. |
-| Alumni / Mentor | `alumni` | Yes | Manage alumni profile, mentor students (requires verification in Phase 3). |
-| Alumni Relations Officer | `alumni_officer` | No (Admin only) | Verify alumni identities and match ERP records. |
-| Placement Officer | `placement_officer` | No (Admin only) | Read-only program participation and outcomes analytics. |
-| Administrator | `admin` | No (Internal) | User governance, platform configurations, security audits. |
+| Role                     | Internal Value      | Public Registration? | Responsibilities                                                           |
+| :----------------------- | :------------------ | :------------------: | :------------------------------------------------------------------------- |
+| Student                  | `student`           |         Yes          | Discover mentors, apply for mentorship, track goals.                       |
+| Alumni / Mentor          | `alumni`            |         Yes          | Manage alumni profile, mentor students (requires verification in Phase 3). |
+| Alumni Relations Officer | `alumni_officer`    |   No (Admin only)    | Verify alumni identities and match ERP records.                            |
+| Placement Officer        | `placement_officer` |   No (Admin only)    | Read-only program participation and outcomes analytics.                    |
+| Administrator            | `admin`             |    No (Internal)     | User governance, platform configurations, security audits.                 |
 
 > [!IMPORTANT]
 > **Alumni Registration vs. Verification**: Self-registering as an `alumni` creates an account with status `active`, but **does NOT** grant verified mentor status. Verification is performed in Phase 3 by an Alumni Relations Officer.
 
 ### Session & Cookie Security
+
 - Authentication tokens are signed with **HMAC-SHA256** and contain only the subject (`sub: userId`).
 - Role and account status are resolved dynamically from the database on every authenticated request, preventing stale privilege retention.
 - Session tokens are stored in an **HTTP-only**, **SameSite=Lax**, **Secure** (in production) cookie (`p11_auth_token`).
@@ -294,7 +306,21 @@ All scripts are cross-platform and work seamlessly in Windows PowerShell and Com
 - [x] Role-aware navigation links in Navbar and quick action cards in Dashboard.
 - [x] Comprehensive test suites: 63 backend integration/unit tests and client smoke tests passing.
 
-### Upcoming in Phase 4:
+### Completed in Phase 4 (Profiles & Mentorship Offerings):
 
-- [ ] Student career profiles, target domains, and mentee preference collection.
-- [ ] Alumni mentor profiles, capacity controls, and topic availability.
+- [x] Student profile schema (`StudentProfile`) with academic identity, skills, career interests/goals, mentorship preferences.
+- [x] Server-calculated student profile completion percentage (balanced 4-category metric: 30/30/20/20).
+- [x] Alumni professional profile schema (`AlumniProfile`) with headline, designation, company, industry domain, experience, bio, skills, and draft/published controls.
+- [x] Immutability of verified institutional credentials projected safely from approved `AlumniVerification`.
+- [x] Strict publishing guards preventing unverified or non-active alumni from setting `isDraft: false` or `isPubliclyVisible: true`.
+- [x] Mentorship offering management (`MentorshipOffer`) with session duration, mentee capacity, topics, and soft-delete (`isDeleted: true`).
+- [x] Mentorship discovery engine with keyword search, topic/mode/industry filtering, pagination, and strict 4-layer eligibility checks.
+- [x] Responsive frontend pages: `/profile` (student and alumni editors), `/mentorship/offers` (alumni offering manager), `/mentorship/discover` (search & browse), `/mentorship/offers/[id]` (offering details), and `/alumni/[id]` (public alumni profile).
+- [x] Navigation bar and Dashboard enhancements with quick links, profile completion indicators, and role-specific shortcuts.
+- [x] Comprehensive test suites: 79 backend tests and frontend Vitest component tests passing.
+
+### Upcoming in Phase 5 (Explainable Matching Engine):
+
+- [ ] Transparent rule-weighted scoring algorithm (no black-box AI).
+- [ ] Match breakdown and compatibility scoring between students and active alumni offerings.
+- [ ] Placement Officer cohort match reports.

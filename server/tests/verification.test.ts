@@ -46,9 +46,8 @@ vi.mock('../src/modules/audit/audit.model.js', () => ({
 
 const { User } = await import('../src/modules/auth/user.model.js');
 const { AlumniVerification } = await import('../src/modules/verification/verification.model.js');
-const { InstitutionalAlumniRecord } = await import(
-  '../src/modules/verification/institutionalRecord.model.js'
-);
+const { InstitutionalAlumniRecord } =
+  await import('../src/modules/verification/institutionalRecord.model.js');
 const { env } = await import('../src/config/env.js');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -189,7 +188,9 @@ describe('Alumni Verification API — POST /api/v1/verification/submit', () => {
     mockAuthUser(mockAlumniUser);
     vi.mocked(AlumniVerification.findOne).mockResolvedValue(null);
     vi.mocked(AlumniVerification.countDocuments).mockResolvedValue(0);
-    vi.mocked(InstitutionalAlumniRecord.findOne).mockResolvedValue(mockInstitutionalRecord as never);
+    vi.mocked(InstitutionalAlumniRecord.findOne).mockResolvedValue(
+      mockInstitutionalRecord as never
+    );
     vi.mocked(AlumniVerification.create).mockResolvedValue(mockPendingVerification as never);
 
     const token = signToken(mockAlumniUser._id.toString());

@@ -32,9 +32,8 @@ vi.mock('../src/modules/audit/audit.model.js', () => ({
 }));
 
 const { User } = await import('../src/modules/auth/user.model.js');
-const { InstitutionalAlumniRecord } = await import(
-  '../src/modules/verification/institutionalRecord.model.js'
-);
+const { InstitutionalAlumniRecord } =
+  await import('../src/modules/verification/institutionalRecord.model.js');
 const { env } = await import('../src/config/env.js');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

@@ -239,7 +239,8 @@ export default function VerificationPage() {
                   on{' '}
                   {verification.reviewedAt
                     ? new Date(verification.reviewedAt).toLocaleDateString()
-                    : 'record'}.
+                    : 'record'}
+                  .
                 </p>
               </CardContent>
             </Card>
@@ -257,11 +258,15 @@ export default function VerificationPage() {
                         Verification Request Pending Review
                       </CardTitle>
                       <CardDescription className="text-amber-700 dark:text-amber-300">
-                        Submitted on {new Date(verification.submittedAt).toLocaleDateString()} (Version {verification.submissionVersion})
+                        Submitted on {new Date(verification.submittedAt).toLocaleDateString()}{' '}
+                        (Version {verification.submissionVersion})
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                  <Badge
+                    variant="secondary"
+                    className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                  >
                     Pending Review
                   </Badge>
                 </div>
@@ -337,15 +342,25 @@ export default function VerificationPage() {
                     Officer Reason for Rejection:
                   </span>
                   <p className="text-foreground font-medium">
-                    {verification.rejectionReason || 'Details could not be reconciled with registry.'}
+                    {verification.rejectionReason ||
+                      'Details could not be reconciled with registry.'}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground p-3 rounded-md bg-muted/40">
-                  <div>Alumni ID: <strong className="text-foreground">{verification.alumniId}</strong></div>
-                  <div>Email: <strong className="text-foreground">{verification.institutionalEmail}</strong></div>
-                  <div>Programme: <strong className="text-foreground">{verification.programme}</strong></div>
-                  <div>Year: <strong className="text-foreground">{verification.graduationYear}</strong></div>
+                  <div>
+                    Alumni ID: <strong className="text-foreground">{verification.alumniId}</strong>
+                  </div>
+                  <div>
+                    Email:{' '}
+                    <strong className="text-foreground">{verification.institutionalEmail}</strong>
+                  </div>
+                  <div>
+                    Programme: <strong className="text-foreground">{verification.programme}</strong>
+                  </div>
+                  <div>
+                    Year: <strong className="text-foreground">{verification.graduationYear}</strong>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="pt-2">
@@ -371,7 +386,8 @@ export default function VerificationPage() {
                     : 'Submit Institutional Academic Details'}
                 </CardTitle>
                 <CardDescription>
-                  Enter the exact credentials recorded in your university degree and graduation registry
+                  Enter the exact credentials recorded in your university degree and graduation
+                  registry
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -453,9 +469,7 @@ export default function VerificationPage() {
                       {...register('graduationYear')}
                     />
                     {errors.graduationYear && (
-                      <p className="text-xs text-destructive">
-                        {errors.graduationYear.message}
-                      </p>
+                      <p className="text-xs text-destructive">{errors.graduationYear.message}</p>
                     )}
                   </div>
 
@@ -468,11 +482,7 @@ export default function VerificationPage() {
                   </div>
 
                   <div className="flex items-center gap-3 pt-2">
-                    <Button
-                      type="submit"
-                      className="w-full sm:w-auto"
-                      isLoading={isSubmitting}
-                    >
+                    <Button type="submit" className="w-full sm:w-auto" isLoading={isSubmitting}>
                       {verification?.status === 'rejected'
                         ? 'Resubmit For Verification'
                         : 'Submit For Institutional Verification'}
@@ -496,4 +506,3 @@ export default function VerificationPage() {
     </div>
   );
 }
-

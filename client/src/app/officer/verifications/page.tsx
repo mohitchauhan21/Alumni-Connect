@@ -230,10 +230,17 @@ export default function OfficerVerificationPage() {
           </div>
 
           {actionSuccess && (
-            <Alert variant="default" className="border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/30">
+            <Alert
+              variant="default"
+              className="border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/30"
+            >
               <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              <AlertTitle className="text-emerald-900 dark:text-emerald-100">Operation Successful</AlertTitle>
-              <AlertDescription className="text-emerald-800 dark:text-emerald-200">{actionSuccess}</AlertDescription>
+              <AlertTitle className="text-emerald-900 dark:text-emerald-100">
+                Operation Successful
+              </AlertTitle>
+              <AlertDescription className="text-emerald-800 dark:text-emerald-200">
+                {actionSuccess}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -254,7 +261,7 @@ export default function OfficerVerificationPage() {
                     Pending Queue
                   </p>
                   <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                    {metricsLoading ? '—' : metrics?.pendingCount ?? 0}
+                    {metricsLoading ? '—' : (metrics?.pendingCount ?? 0)}
                   </p>
                 </div>
                 <Clock className="h-8 w-8 text-amber-500/40" />
@@ -268,7 +275,7 @@ export default function OfficerVerificationPage() {
                     Verified
                   </p>
                   <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                    {metricsLoading ? '—' : metrics?.verifiedCount ?? 0}
+                    {metricsLoading ? '—' : (metrics?.verifiedCount ?? 0)}
                   </p>
                 </div>
                 <CheckCircle2 className="h-8 w-8 text-emerald-500/40" />
@@ -282,7 +289,7 @@ export default function OfficerVerificationPage() {
                     Rejected
                   </p>
                   <p className="text-2xl font-bold text-destructive">
-                    {metricsLoading ? '—' : metrics?.rejectedCount ?? 0}
+                    {metricsLoading ? '—' : (metrics?.rejectedCount ?? 0)}
                   </p>
                 </div>
                 <XCircle className="h-8 w-8 text-destructive/40" />
@@ -296,7 +303,7 @@ export default function OfficerVerificationPage() {
                     Registry Records
                   </p>
                   <p className="text-2xl font-bold text-primary">
-                    {metricsLoading ? '—' : metrics?.totalRecordsCount ?? 0}
+                    {metricsLoading ? '—' : (metrics?.totalRecordsCount ?? 0)}
                   </p>
                 </div>
                 <Database className="h-8 w-8 text-primary/40" />
@@ -310,9 +317,7 @@ export default function OfficerVerificationPage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
                   <CardTitle className="text-lg">Verification Queue</CardTitle>
-                  <CardDescription>
-                    {totalCount} total request(s) found
-                  </CardDescription>
+                  <CardDescription>{totalCount} total request(s) found</CardDescription>
                 </div>
 
                 {/* Filters */}
@@ -393,29 +398,42 @@ export default function OfficerVerificationPage() {
                         <tr key={item.id} className="hover:bg-muted/30 transition-colors">
                           <td className="py-3 px-4 font-medium">
                             <div>{item.applicantName}</div>
-                            <div className="text-[11px] text-muted-foreground">{item.applicantEmail}</div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {item.applicantEmail}
+                            </div>
                           </td>
                           <td className="py-3 px-4 font-mono font-semibold text-foreground">
                             {item.alumniId}
                           </td>
                           <td className="py-3 px-4">
                             <div>{item.programme}</div>
-                            <div className="text-[11px] text-muted-foreground">{item.department}</div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {item.department}
+                            </div>
                           </td>
                           <td className="py-3 px-4">{item.graduationYear}</td>
                           <td className="py-3 px-4">
                             {item.matchingResult === 'matched' && (
-                              <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-[11px]">
+                              <Badge
+                                variant="default"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-[11px]"
+                              >
                                 Matched
                               </Badge>
                             )}
                             {item.matchingResult === 'conflict' && (
-                              <Badge variant="secondary" className="bg-amber-100 text-amber-900 text-[11px]">
+                              <Badge
+                                variant="secondary"
+                                className="bg-amber-100 text-amber-900 text-[11px]"
+                              >
                                 Conflict
                               </Badge>
                             )}
                             {item.matchingResult === 'unmatched' && (
-                              <Badge variant="outline" className="text-muted-foreground text-[11px]">
+                              <Badge
+                                variant="outline"
+                                className="text-muted-foreground text-[11px]"
+                              >
                                 Unmatched
                               </Badge>
                             )}
@@ -492,7 +510,8 @@ export default function OfficerVerificationPage() {
                   <div>
                     <h2 className="text-lg font-bold">Verification Review</h2>
                     <p className="text-xs text-muted-foreground">
-                      Request ID: {selectedVerification.id} (Version {selectedVerification.submissionVersion})
+                      Request ID: {selectedVerification.id} (Version{' '}
+                      {selectedVerification.submissionVersion})
                     </p>
                   </div>
                   <button
@@ -543,13 +562,42 @@ export default function OfficerVerificationPage() {
                     <span className="font-semibold uppercase text-muted-foreground tracking-wider block">
                       Applicant Submission
                     </span>
-                    <div>Name: <strong className="text-foreground">{selectedVerification.applicantName}</strong></div>
-                    <div>Account Email: <span className="text-foreground">{selectedVerification.applicantAccountEmail}</span></div>
-                    <div>Alumni ID: <strong className="text-foreground font-mono">{selectedVerification.alumniId}</strong></div>
-                    <div>Inst Email: <span className="text-foreground">{selectedVerification.institutionalEmail}</span></div>
-                    <div>Programme: <span className="text-foreground">{selectedVerification.programme}</span></div>
-                    <div>Dept: <span className="text-foreground">{selectedVerification.department}</span></div>
-                    <div>Grad Year: <span className="text-foreground">{selectedVerification.graduationYear}</span></div>
+                    <div>
+                      Name:{' '}
+                      <strong className="text-foreground">
+                        {selectedVerification.applicantName}
+                      </strong>
+                    </div>
+                    <div>
+                      Account Email:{' '}
+                      <span className="text-foreground">
+                        {selectedVerification.applicantAccountEmail}
+                      </span>
+                    </div>
+                    <div>
+                      Alumni ID:{' '}
+                      <strong className="text-foreground font-mono">
+                        {selectedVerification.alumniId}
+                      </strong>
+                    </div>
+                    <div>
+                      Inst Email:{' '}
+                      <span className="text-foreground">
+                        {selectedVerification.institutionalEmail}
+                      </span>
+                    </div>
+                    <div>
+                      Programme:{' '}
+                      <span className="text-foreground">{selectedVerification.programme}</span>
+                    </div>
+                    <div>
+                      Dept:{' '}
+                      <span className="text-foreground">{selectedVerification.department}</span>
+                    </div>
+                    <div>
+                      Grad Year:{' '}
+                      <span className="text-foreground">{selectedVerification.graduationYear}</span>
+                    </div>
                   </div>
 
                   {/* Official Record */}
@@ -559,16 +607,47 @@ export default function OfficerVerificationPage() {
                     </span>
                     {selectedVerification.matchedRecord ? (
                       <>
-                        <div>Name: <strong className="text-foreground">{selectedVerification.matchedRecord.fullName}</strong></div>
-                        <div>Alumni ID: <strong className="text-foreground font-mono">{selectedVerification.matchedRecord.alumniId}</strong></div>
-                        <div>Inst Email: <span className="text-foreground">{selectedVerification.matchedRecord.institutionalEmail}</span></div>
-                        <div>Programme: <span className="text-foreground">{selectedVerification.matchedRecord.programme}</span></div>
-                        <div>Dept: <span className="text-foreground">{selectedVerification.matchedRecord.department}</span></div>
-                        <div>Grad Year: <span className="text-foreground">{selectedVerification.matchedRecord.graduationYear}</span></div>
+                        <div>
+                          Name:{' '}
+                          <strong className="text-foreground">
+                            {selectedVerification.matchedRecord.fullName}
+                          </strong>
+                        </div>
+                        <div>
+                          Alumni ID:{' '}
+                          <strong className="text-foreground font-mono">
+                            {selectedVerification.matchedRecord.alumniId}
+                          </strong>
+                        </div>
+                        <div>
+                          Inst Email:{' '}
+                          <span className="text-foreground">
+                            {selectedVerification.matchedRecord.institutionalEmail}
+                          </span>
+                        </div>
+                        <div>
+                          Programme:{' '}
+                          <span className="text-foreground">
+                            {selectedVerification.matchedRecord.programme}
+                          </span>
+                        </div>
+                        <div>
+                          Dept:{' '}
+                          <span className="text-foreground">
+                            {selectedVerification.matchedRecord.department}
+                          </span>
+                        </div>
+                        <div>
+                          Grad Year:{' '}
+                          <span className="text-foreground">
+                            {selectedVerification.matchedRecord.graduationYear}
+                          </span>
+                        </div>
                       </>
                     ) : (
                       <div className="py-8 text-center text-muted-foreground">
-                        No corresponding record found in institutional dataset for ID &quot;{selectedVerification.alumniId}&quot;.
+                        No corresponding record found in institutional dataset for ID &quot;
+                        {selectedVerification.alumniId}&quot;.
                       </div>
                     )}
                   </div>
@@ -577,7 +656,11 @@ export default function OfficerVerificationPage() {
                 {/* Rejection reason box */}
                 {rejecting && (
                   <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/5 space-y-2">
-                    <Label htmlFor="rejectReason" required className="text-xs text-destructive font-semibold">
+                    <Label
+                      htmlFor="rejectReason"
+                      required
+                      className="text-xs text-destructive font-semibold"
+                    >
                       Reason for Disapproval (Mandatory)
                     </Label>
                     <textarea
@@ -589,11 +672,7 @@ export default function OfficerVerificationPage() {
                       className="w-full text-xs p-2.5 rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-destructive"
                     />
                     <div className="flex justify-end gap-2 pt-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setRejecting(false)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setRejecting(false)}>
                         Cancel
                       </Button>
                       <Button
@@ -621,11 +700,7 @@ export default function OfficerVerificationPage() {
 
                     {selectedVerification.status === 'pending' && (
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => setRejecting(true)}
-                        >
+                        <Button variant="destructive" size="sm" onClick={() => setRejecting(true)}>
                           Reject Request...
                         </Button>
 
@@ -651,4 +726,3 @@ export default function OfficerVerificationPage() {
     </div>
   );
 }
-

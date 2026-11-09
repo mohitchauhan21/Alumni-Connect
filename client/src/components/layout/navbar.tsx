@@ -4,7 +4,19 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/layout/container';
-import { GraduationCap, Menu, X, ShieldCheck, LayoutDashboard, LogOut, CheckCircle2, FileSpreadsheet } from 'lucide-react';
+import {
+  GraduationCap,
+  Menu,
+  X,
+  ShieldCheck,
+  LayoutDashboard,
+  LogOut,
+  CheckCircle2,
+  FileSpreadsheet,
+  User,
+  Sparkles,
+  Compass,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Navbar() {
@@ -69,16 +81,38 @@ export function Navbar() {
               Verification Standards
             </Link>
 
+            {/* Authenticated Discovery */}
+            {user && (
+              <Link
+                href="/mentorship/discover"
+                id="nav-link-mentorship-discover"
+                className="text-muted-foreground flex items-center gap-1.5 transition-colors hover:text-foreground"
+              >
+                <Compass className="h-4 w-4" />
+                Explore Mentorship
+              </Link>
+            )}
+
             {/* Role-Specific Shortcuts */}
             {user?.role === 'alumni' && (
-              <Link
-                href="/verification"
-                id="nav-link-alumni-verification"
-                className="text-primary font-semibold flex items-center gap-1.5 transition-colors hover:text-primary/80"
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                Get Verified
-              </Link>
+              <>
+                <Link
+                  href="/mentorship/offers"
+                  id="nav-link-alumni-offers"
+                  className="text-muted-foreground flex items-center gap-1.5 transition-colors hover:text-foreground"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  My Offers
+                </Link>
+                <Link
+                  href="/verification"
+                  id="nav-link-alumni-verification"
+                  className="text-primary font-semibold flex items-center gap-1.5 transition-colors hover:text-primary/80"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Get Verified
+                </Link>
+              </>
             )}
 
             {(user?.role === 'alumni_officer' || user?.role === 'admin') && (
@@ -107,6 +141,12 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
+                <Link href="/profile" id="nav-btn-profile">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    Profile
+                  </Button>
+                </Link>
                 <Link href="/dashboard" id="nav-btn-dashboard">
                   <Button variant="ghost" size="sm" className="gap-2">
                     <LayoutDashboard className="h-4 w-4" />
@@ -179,15 +219,36 @@ export function Navbar() {
                 Verification Standards
               </Link>
 
-              {user?.role === 'alumni' && (
+              {user && (
                 <Link
-                  href="/verification"
+                  href="/mentorship/discover"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-primary flex items-center gap-2 py-1"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 py-1"
                 >
-                  <CheckCircle2 className="h-4 w-4" />
-                  Institutional Verification
+                  <Compass className="h-4 w-4" />
+                  Explore Mentorship
                 </Link>
+              )}
+
+              {user?.role === 'alumni' && (
+                <>
+                  <Link
+                    href="/mentorship/offers"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 py-1"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    My Mentorship Offers
+                  </Link>
+                  <Link
+                    href="/verification"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-semibold text-primary flex items-center gap-2 py-1"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Institutional Verification
+                  </Link>
+                </>
               )}
 
               {(user?.role === 'alumni_officer' || user?.role === 'admin') && (
@@ -214,6 +275,12 @@ export function Navbar() {
             <div className="flex flex-col space-y-2 pt-2 border-t px-2">
               {user ? (
                 <>
+                  <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full justify-center gap-2">
+                      <User className="h-4 w-4" />
+                      My Profile
+                    </Button>
+                  </Link>
                   <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="outline" className="w-full justify-center gap-2">
                       <LayoutDashboard className="h-4 w-4" />

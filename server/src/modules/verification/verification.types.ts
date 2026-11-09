@@ -143,4 +143,3 @@ export interface VerificationMetricsDTO {
   rejectedCount: number;
   totalRecordsCount: number;
 }
-

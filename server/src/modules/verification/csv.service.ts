@@ -186,11 +186,8 @@ export function parseAndValidateCsv(fileBuffer: Buffer | string): ParsedCsvResul
 /**
  * Step A: Preview import without database mutation.
  */
-export async function previewCsvImport(
-  fileBuffer: Buffer | string
-): Promise<CsvImportPreviewDTO> {
-  const { validRecords, errors, duplicateCount, totalRows } =
-    parseAndValidateCsv(fileBuffer);
+export async function previewCsvImport(fileBuffer: Buffer | string): Promise<CsvImportPreviewDTO> {
+  const { validRecords, errors, duplicateCount, totalRows } = parseAndValidateCsv(fileBuffer);
 
   // Check for potential conflicts with already claimed records in DB
   let existingConflictsCount = 0;
@@ -336,4 +333,3 @@ export async function confirmCsvImport(
     failedCount: 0,
   };
 }
-

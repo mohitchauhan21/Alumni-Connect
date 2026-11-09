@@ -1,63 +1,74 @@
-# P11 — Phase 3: Verification & Officer Workflow Completed
+# P11 — Phase 4: Pending Work
 
 ## Current Phase
-**Phase 3 — Alumni Institutional Verification and Officer Workflow**
+**Phase 4 — Student & Alumni Profiles and Mentorship Offerings (COMPLETED)**
 
-## Status
-✅ **Phase 3 Complete**
+## Current Task
+**Phase 4 Completed. Ready for User Review and Next Phase (Phase 5).**
 
 ---
 
-## Phase 3 Completed Tasks
+## Phase 4 Task Breakdown
 
-### T1 — Inspection and Planning ✅
-- [x] Inspect existing Phase 1 and Phase 2 code and tracking files
-- [x] Inspect dependencies (installed `multer`, `csv-parse`, `@types/multer`)
-- [x] Initialize Phase 3 task breakdown in tracking files
+### T1 — Existing Codebase Review & Planning
+- [x] Inspect existing architecture, models, middleware, and routes
+- [x] Review Phase 1–3 documentation and tracking
+- [x] Initialize Phase 4 task breakdown in tracking files
 
-### T2 — Verification, Institutional Record & Audit Models ✅
-- [x] Create `server/src/modules/verification/verification.types.ts`
-- [x] Create `server/src/modules/verification/verification.model.ts` (`AlumniVerification`)
-- [x] Create `server/src/modules/verification/institutionalRecord.model.ts` (`InstitutionalAlumniRecord`)
-- [x] Create `server/src/modules/audit/audit.model.ts` (`AuditLog`)
-- [x] Create `server/src/modules/audit/audit.service.ts`
-- [x] Enforce schema validation, indexes, and unique constraints
+### T2 — Database Models and Backend Services
+- [x] Create `server/src/modules/profile/studentProfile.model.ts` (with dynamic completion percentage)
+- [x] Create `server/src/modules/profile/alumniProfile.model.ts` (with draft/publish states and institutional consistency)
+- [x] Create `server/src/modules/mentorship/mentorshipOffer.model.ts` (with soft delete and discovery indexes)
+- [x] Create `server/src/modules/profile/profile.types.ts` & `server/src/modules/mentorship/mentorship.types.ts`
+- [x] Create `server/src/modules/profile/profile.service.ts`
+- [x] Create `server/src/modules/mentorship/mentorship.service.ts`
 
-### T3 — CSV Import Functionality ✅
-- [x] Create `server/src/modules/verification/csv.service.ts` for in-memory parsing, header checking, row validation, deduplication
-- [x] Create `server/src/middleware/upload.ts` (Multer memoryStorage with file size & extension filters)
-- [x] Implement preview logic (`previewCsvImport`) without database mutation
-- [x] Implement confirm import logic (`confirmCsvImport`) with idempotent upserts
-- [x] Audit log event generation on import (`AUDIT_ACTIONS.CSV_IMPORT_PERFORMED`)
+### T3 — Profile APIs
+- [x] Create `server/src/modules/profile/profile.schemas.ts` (Zod validation for student & alumni profiles)
+- [x] Create `server/src/modules/profile/profile.controller.ts`
+- [x] Create `server/src/modules/profile/profile.router.ts` (mounted at `/api/v1/profiles`)
+- [x] Endpoints:
+  - `GET /api/v1/profiles/me`
+  - `PATCH /api/v1/profiles/me`
+  - `GET /api/v1/profiles/alumni/:userId`
 
-### T4 — Matching and Verification Services ✅
-- [x] Create `server/src/modules/verification/matching.service.ts` (deterministic rules: exact alumni_id, email, cross-check name, dept, year)
-- [x] Create `server/src/modules/verification/verification.service.ts` (submit, resubmit, queue listing, detail view, approval, rejection, metrics)
-- [x] Ensure concurrency-safe approval preventing duplicate claims on institutional records
+### T4 — Mentorship Offering Management APIs
+- [x] Create `server/src/modules/mentorship/mentorship.schemas.ts` (Zod validation for offering creation & updates)
+- [x] Create `server/src/modules/mentorship/mentorship.controller.ts`
+- [x] Create `server/src/modules/mentorship/mentorship.router.ts` (mounted at `/api/v1/mentorship`)
+- [x] Endpoints:
+  - `POST /api/v1/mentorship/offers`
+  - `GET /api/v1/mentorship/offers/mine`
+  - `GET /api/v1/mentorship/offers/:id`
+  - `PATCH /api/v1/mentorship/offers/:id`
+  - `DELETE /api/v1/mentorship/offers/:id`
 
-### T5 — Backend APIs and Audit Endpoints ✅
-- [x] Create `server/src/modules/verification/verification.schemas.ts` (Zod validation)
-- [x] Create `server/src/modules/verification/verification.controller.ts`
-- [x] Create `server/src/modules/verification/verification.router.ts`
-- [x] Mount `/api/v1/verification` in `server/src/app.ts`
-- [x] Ensure safe response DTOs (no sensitive institutional datasets or PII exposed to students/alumni)
+### T5 — Discovery APIs
+- [x] Implement search, filter, and pagination in `GET /api/v1/mentorship/offers`
+- [x] Ensure strict discovery eligibility: active offer, verified alumnus, active account, public profile
+- [x] Support filters: topic, industry, mode, search query
 
-### T6 — Frontend Implementation ✅
-- [x] Update `client/src/lib/api.ts` with Phase 3 verification and officer API methods
-- [x] Create Alumni Verification Portal (`client/src/app/verification/page.tsx`) with not_submitted, pending, verified, rejected states
-- [x] Create Officer Verification Dashboard (`client/src/app/officer/verifications/page.tsx`) with live metrics, search, queue table, side-by-side comparison modal, approve & reject
-- [x] Create CSV Import Page (`client/src/app/officer/verifications/import/page.tsx`) with format guide, drag-and-drop, preview summary, row error list, and idempotent confirm import
-- [x] Update Navbar (`client/src/components/layout/navbar.tsx`) and Dashboard (`client/src/app/dashboard/page.tsx`) for role-aware links (`alumni`, `alumni_officer`, `admin`)
-- [x] Typecheck and build verification for Phase 3 frontend components
+### T6 — Frontend Implementation
+- [x] Update `client/src/lib/api.ts` with Phase 4 API methods and DTOs
+- [x] Create Student & Alumni Profile Manager (`client/src/app/profile/page.tsx`)
+- [x] Create Alumni Mentorship Offer Management page (`client/src/app/mentorship/offers/page.tsx`)
+- [x] Create Mentorship Discovery page (`client/src/app/mentorship/discover/page.tsx`)
+- [x] Create Mentorship Offer Detail view (`client/src/app/mentorship/offers/[id]/page.tsx`)
+- [x] Create Alumnus Public Profile view (`client/src/app/alumni/[id]/page.tsx`)
+- [x] Update Navbar (`client/src/components/layout/navbar.tsx`) with Explore Mentorship, My Offers, and Profile
+- [x] Update Dashboard (`client/src/app/dashboard/page.tsx`) with profile progress and mentorship offer actions
+- [x] Clean up remaining ESLint unused imports across new pages
 
-### T7 — Testing, Verification & Documentation ✅
-- [x] Create backend verification tests (`server/tests/verification.test.ts`)
-- [x] Create backend CSV import tests (`server/tests/csvImport.test.ts`)
-- [x] Run full test suite across monorepo: 63 server tests & client smoke tests pass
-- [x] Run typecheck (`npm run typecheck`) — 0 errors
-- [x] Run lint (`npm run lint`) — 0 errors, 0 warnings
-- [x] Update `README.md` and `docs/ARCHITECTURE.md`
-- [x] Update `docs/PROGRESS.md` and `docs/PENDING.md` with final Phase 3 status
+### T7 — Testing, Verification & Documentation
+- [x] Write backend profile tests (`server/tests/profile.test.ts` — 8 test cases passing)
+- [x] Write backend mentorship offering tests (`server/tests/mentorship.test.ts` — 8 test cases passing)
+- [x] Write client smoke/component tests (`client/src/test/profile.test.tsx` — 2 test cases passing)
+- [x] Run full test suites across monorepo (79 server tests, 3 client tests passing)
+- [x] Run typecheck (`npm run typecheck` — 0 errors across server & client)
+- [x] Run lint (`npm run lint` — 0 errors, 0 warnings across server & client)
+- [x] Run format check (`npm run format:check` — clean Prettier formatting across entire monorepo)
+- [x] Run production builds (`npm run build:server` and `npm run build:client` — 13 static/dynamic routes generated cleanly)
+- [x] Update `README.md`, `docs/ARCHITECTURE.md`, `docs/PROGRESS.md`, and `docs/PENDING.md`
 
 ---
 
@@ -70,10 +81,10 @@ _None._
 ## Blockers Requiring Developer Action
 _None._
 
-## Next Phase
-**Phase 4 — Student Career Profiles, Alumni Capacity Quotas & Availability**
-- Student career profiles & target domains (Phase 4)
-- Alumni mentor profiles, capacity quotas & availability (Phase 4)
-- Transparent explainable matching engine (Phase 5)
+## Deferred to Future Phases (Phase 5+)
+- Transparent explainable matching engine & scoring (Phase 5)
 - Mentorship applications & session scheduling (Phase 6)
 - Goals, milestones, feedback rubrics & Placement Officer reports (Phase 7)
+
+## Next Exact Task to Execute
+All Phase 4 tasks are complete and verified. Ready for user confirmation before starting Phase 5.

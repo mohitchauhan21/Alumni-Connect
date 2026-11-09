@@ -10,6 +10,8 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { healthRouter } from './modules/health/health.router.js';
 import { authRouter } from './modules/auth/auth.router.js';
 import { verificationRouter } from './modules/verification/verification.router.js';
+import { profileRouter } from './modules/profile/profile.router.js';
+import { mentorshipRouter } from './modules/mentorship/mentorship.router.js';
 
 export function createApp(): Express {
   const app = express();
@@ -44,6 +46,8 @@ export function createApp(): Express {
   app.use('/api/v1/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/verification', verificationRouter);
+  app.use('/api/v1/profiles', profileRouter);
+  app.use('/api/v1/mentorship', mentorshipRouter);
 
   // 404 handler for unknown routes
   app.use(notFoundHandler);

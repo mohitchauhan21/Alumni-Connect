@@ -214,9 +214,12 @@ export default function OfficerCsvImportPage() {
               >
                 <ArrowLeft className="h-3.5 w-3.5" /> Back to Verification Queue
               </Link>
-              <h1 className="text-2xl font-bold tracking-tight">Institutional Records CSV Import</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Institutional Records CSV Import
+              </h1>
               <p className="text-sm text-muted-foreground">
-                Import authoritative university graduation rosters to power deterministic alumni verification.
+                Import authoritative university graduation rosters to power deterministic alumni
+                verification.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -258,10 +261,13 @@ export default function OfficerCsvImportPage() {
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
               <div className="bg-muted/50 rounded-md p-3 border font-mono text-xs overflow-x-auto text-foreground">
-                <code>alumni_id,full_name,institutional_email,programme,department,graduation_year</code>
+                <code>
+                  alumni_id,full_name,institutional_email,programme,department,graduation_year
+                </code>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Max 5,000 rows per file. Upserts are idempotent: identical records update details without unclaiming verified alumni.
+                Max 5,000 rows per file. Upserts are idempotent: identical records update details
+                without unclaiming verified alumni.
               </p>
             </CardContent>
           </Card>
@@ -279,27 +285,38 @@ export default function OfficerCsvImportPage() {
                       Import Completed Successfully
                     </h2>
                     <p className="text-xs text-emerald-800 dark:text-emerald-300">
-                      The institutional records database has been updated and an append-only audit entry has been logged.
+                      The institutional records database has been updated and an append-only audit
+                      entry has been logged.
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                   <div className="bg-card/80 p-3 rounded-lg border text-center">
-                    <p className="text-xs text-muted-foreground uppercase font-medium">Total Processed</p>
+                    <p className="text-xs text-muted-foreground uppercase font-medium">
+                      Total Processed
+                    </p>
                     <p className="text-xl font-bold">{importResult.totalProcessed}</p>
                   </div>
                   <div className="bg-card/80 p-3 rounded-lg border text-center">
-                    <p className="text-xs text-muted-foreground uppercase font-medium">New Inserted</p>
-                    <p className="text-xl font-bold text-emerald-600">{importResult.insertedCount}</p>
+                    <p className="text-xs text-muted-foreground uppercase font-medium">
+                      New Inserted
+                    </p>
+                    <p className="text-xl font-bold text-emerald-600">
+                      {importResult.insertedCount}
+                    </p>
                   </div>
                   <div className="bg-card/80 p-3 rounded-lg border text-center">
                     <p className="text-xs text-muted-foreground uppercase font-medium">Updated</p>
                     <p className="text-xl font-bold text-blue-600">{importResult.updatedCount}</p>
                   </div>
                   <div className="bg-card/80 p-3 rounded-lg border text-center">
-                    <p className="text-xs text-muted-foreground uppercase font-medium">Errors / Skipped</p>
-                    <p className="text-xl font-bold text-muted-foreground">{importResult.skippedCount}</p>
+                    <p className="text-xs text-muted-foreground uppercase font-medium">
+                      Errors / Skipped
+                    </p>
+                    <p className="text-xl font-bold text-muted-foreground">
+                      {importResult.skippedCount}
+                    </p>
                   </div>
                 </div>
 
@@ -424,10 +441,14 @@ export default function OfficerCsvImportPage() {
                       Import Preview Summary
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Inspect parsed records and validation status before executing the database commit.
+                      Inspect parsed records and validation status before executing the database
+                      commit.
                     </CardDescription>
                   </div>
-                  <Badge variant={previewData.validRowsCount > 0 ? 'default' : 'secondary'} className="self-start sm:self-auto">
+                  <Badge
+                    variant={previewData.validRowsCount > 0 ? 'default' : 'secondary'}
+                    className="self-start sm:self-auto"
+                  >
                     {previewData.validRowsCount} Valid Records
                   </Badge>
                 </div>
@@ -436,20 +457,30 @@ export default function OfficerCsvImportPage() {
                 {/* Metric Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="p-3 rounded-lg border bg-card text-center">
-                    <p className="text-xs text-muted-foreground uppercase font-medium">Total Rows</p>
+                    <p className="text-xs text-muted-foreground uppercase font-medium">
+                      Total Rows
+                    </p>
                     <p className="text-xl font-bold">{previewData.totalRows}</p>
                   </div>
                   <div className="p-3 rounded-lg border bg-card text-center">
                     <p className="text-xs text-muted-foreground uppercase font-medium">Valid</p>
-                    <p className="text-xl font-bold text-emerald-600">{previewData.validRowsCount}</p>
+                    <p className="text-xl font-bold text-emerald-600">
+                      {previewData.validRowsCount}
+                    </p>
                   </div>
                   <div className="p-3 rounded-lg border bg-card text-center">
                     <p className="text-xs text-muted-foreground uppercase font-medium">Invalid</p>
-                    <p className="text-xl font-bold text-destructive">{previewData.invalidRowsCount}</p>
+                    <p className="text-xl font-bold text-destructive">
+                      {previewData.invalidRowsCount}
+                    </p>
                   </div>
                   <div className="p-3 rounded-lg border bg-card text-center">
-                    <p className="text-xs text-muted-foreground uppercase font-medium">File Duplicates</p>
-                    <p className="text-xl font-bold text-amber-600">{previewData.duplicateRowsCount}</p>
+                    <p className="text-xs text-muted-foreground uppercase font-medium">
+                      File Duplicates
+                    </p>
+                    <p className="text-xl font-bold text-amber-600">
+                      {previewData.duplicateRowsCount}
+                    </p>
                   </div>
                 </div>
 
@@ -457,15 +488,18 @@ export default function OfficerCsvImportPage() {
                 {previewData.errors.length > 0 && (
                   <div className="space-y-2">
                     <h3 className="text-xs font-semibold text-destructive uppercase tracking-wider flex items-center gap-1.5">
-                      <XCircle className="h-4 w-4" /> Row Validation Issues ({previewData.errors.length})
+                      <XCircle className="h-4 w-4" /> Row Validation Issues (
+                      {previewData.errors.length})
                     </h3>
                     <div className="bg-destructive/5 border border-destructive/20 rounded-md p-3 max-h-48 overflow-y-auto space-y-1.5 text-xs">
-                      {previewData.errors.slice(0, 10).map((err: RowValidationError, idx: number) => (
-                        <div key={idx} className="flex items-start gap-2 text-destructive">
-                          <span className="font-semibold font-mono">Row {err.rowNumber}:</span>
-                          <span>{err.reason}</span>
-                        </div>
-                      ))}
+                      {previewData.errors
+                        .slice(0, 10)
+                        .map((err: RowValidationError, idx: number) => (
+                          <div key={idx} className="flex items-start gap-2 text-destructive">
+                            <span className="font-semibold font-mono">Row {err.rowNumber}:</span>
+                            <span>{err.reason}</span>
+                          </div>
+                        ))}
                       {previewData.errors.length > 10 && (
                         <p className="text-[11px] text-muted-foreground pt-1 italic">
                           ... and {previewData.errors.length - 10} more rows with errors.
@@ -492,15 +526,19 @@ export default function OfficerCsvImportPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
-                        {previewData.previewRecords.map((r: ValidatedInstitutionalRecord, idx: number) => (
-                          <tr key={idx} className="hover:bg-muted/20">
-                            <td className="px-3 py-2 font-mono font-medium">{r.alumniId}</td>
-                            <td className="px-3 py-2">{r.fullName}</td>
-                            <td className="px-3 py-2 text-muted-foreground">{r.institutionalEmail}</td>
-                            <td className="px-3 py-2">{r.department}</td>
-                            <td className="px-3 py-2">{r.graduationYear}</td>
-                          </tr>
-                        ))}
+                        {previewData.previewRecords.map(
+                          (r: ValidatedInstitutionalRecord, idx: number) => (
+                            <tr key={idx} className="hover:bg-muted/20">
+                              <td className="px-3 py-2 font-mono font-medium">{r.alumniId}</td>
+                              <td className="px-3 py-2">{r.fullName}</td>
+                              <td className="px-3 py-2 text-muted-foreground">
+                                {r.institutionalEmail}
+                              </td>
+                              <td className="px-3 py-2">{r.department}</td>
+                              <td className="px-3 py-2">{r.graduationYear}</td>
+                            </tr>
+                          )
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -512,8 +550,8 @@ export default function OfficerCsvImportPage() {
                     {previewData.validRowsCount > 0 ? (
                       <span>
                         Confirming will upsert{' '}
-                        <strong className="text-foreground">{previewData.validRowsCount}</strong> records into the
-                        database.
+                        <strong className="text-foreground">{previewData.validRowsCount}</strong>{' '}
+                        records into the database.
                       </span>
                     ) : (
                       <span className="text-destructive font-medium">
@@ -522,7 +560,12 @@ export default function OfficerCsvImportPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <Button variant="outline" size="sm" onClick={handleReset} disabled={isConfirming}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleReset}
+                      disabled={isConfirming}
+                    >
                       Cancel
                     </Button>
                     <Button
