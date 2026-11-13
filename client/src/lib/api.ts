@@ -567,3 +567,127 @@ export async function apiDiscoverMentorshipOffers(query: {
   }>(`/mentorship/offers?${searchParams.toString()}`);
   return res.data;
 }
+
+// ─── Phase 5: Explainable Matching Engine Types & API ────────────────────────
+
+export type MatchCategory = 'Strong Match' | 'Good Match' | 'Moderate Match' | 'Limited Match';
+
+export interface CriterionEvaluation {
+  criterionKey: string;
+  criterionLabel: string;
+  weight: number;
+  score: number;
+  weightedContribution: number;
+  assessable: boolean;
+  matchedValues: string[];
+  unmatchedStudentValues: string[];
+  explanation: string;
+}
+
+export interface RecommendationExplanation {
+  summary: string;
+  strengths: string[];
+  gaps: string[];
+}
+
+export interface RecommendationMentorDTO {
+  userId: string;
+  name: string;
+  headline: string;
+  company: string;
+  industry: string;
+  currentDesignation: string;
+  yearsOfExperience: number;
+  verifiedProgramme?: string;
+  verifiedDepartment?: string;
+}
+
+export interface RecommendationOfferingDTO {
+  id: string;
+  title: string;
+  description: string;
+  topics: string[];
+  targetAudience: string;
+  mode: string;
+  sessionDurationMinutes: number;
+  maxMenteesCapacity: number;
+}
+
+export interface RecommendationDTO {
+  offerId: string;
+  compatibilityScore: number;
+  dataCoverage: number;
+  matchCategory: MatchCategory;
+  hasInsufficientData: boolean;
+  offering: RecommendationOfferingDTO;
+  mentor: RecommendationMentorDTO;
+  explanation: RecommendationExplanation;
+  breakdown: CriterionEvaluation[];
+}
+
+export interface PaginatedRecommendationsDTO {
+  recommendations: RecommendationDTO[];
+  studentCoverage: number;
+  hasInsufficientData: boolean;
+  guidanceMessage?: string;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface MatchingWeightsDTO {
+  criteria: Array<{
+    key: string;
+    label: string;
+    weight: number;
+    description: string;
+  }>;
+  totalWeight: number;
+  minCoverageThreshold: number;
+  categories: Array<{
+    minScore: number;
+    category: string;
+  }>;
+}
+
+export async function apiGetMatchingWeights(): Promise<MatchingWeightsDTO> {
+  const res = await request<{
+    success: boolean;
+    data: MatchingWeightsDTO;
+  }>('/matching/weights');
+  return res.data;
+}
+
+export async function apiGetRecommendations(
+  query: {
+    page?: number;
+    limit?: number;
+    mode?: string;
+    industry?: string;
+    topic?: string;
+  } = {}
+): Promise<PaginatedRecommendationsDTO> {
+  const searchParams = new URLSearchParams();
+  if (query.page) searchParams.set('page', query.page.toString());
+  if (query.limit) searchParams.set('limit', query.limit.toString());
+  if (query.mode && query.mode !== 'all') searchParams.set('mode', query.mode);
+  if (query.industry && query.industry !== 'all') searchParams.set('industry', query.industry);
+  if (query.topic && query.topic !== 'all') searchParams.set('topic', query.topic);
+
+  const res = await request<{
+    success: boolean;
+    data: PaginatedRecommendationsDTO;
+  }>(`/matching/recommendations?${searchParams.toString()}`);
+  return res.data;
+}
+
+export async function apiGetRecommendationDetail(offerId: string): Promise<RecommendationDTO> {
+  const res = await request<{
+    success: boolean;
+    data: { recommendation: RecommendationDTO };
+  }>(`/matching/recommendations/${offerId}`);
+  return res.data.recommendation;
+}

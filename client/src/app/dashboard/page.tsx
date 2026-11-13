@@ -20,8 +20,15 @@ import {
   User,
   Compass,
   Sparkles,
+  Target,
 } from 'lucide-react';
-import { apiGetMyProfile, type StudentProfileDTO, type AlumniProfileDTO } from '@/lib/api';
+import {
+  apiGetMyProfile,
+  apiGetRecommendations,
+  type StudentProfileDTO,
+  type AlumniProfileDTO,
+  type RecommendationDTO,
+} from '@/lib/api';
 
 /** Human-readable role labels. */
 const ROLE_LABELS: Record<string, string> = {
@@ -39,6 +46,9 @@ export default function DashboardPage() {
   const [profileData, setProfileData] = React.useState<StudentProfileDTO | AlumniProfileDTO | null>(
     null
   );
+  const [recommendations, setRecommendations] = React.useState<RecommendationDTO[]>([]);
+  const [recommendationsLoading, setRecommendationsLoading] = React.useState(false);
+  const [insufficientData, setInsufficientData] = React.useState(false);
 
   // Redirect unauthenticated users to login (UX guard; backend enforces access control)
   React.useEffect(() => {
@@ -59,6 +69,19 @@ export default function DashboardPage() {
         .catch(() => {
           // Ignore profile load error in dashboard overview
         });
+    }
+
+    if (user && user.role === 'student') {
+      setRecommendationsLoading(true);
+      apiGetRecommendations({ limit: 3 })
+        .then(res => {
+          setRecommendations(res.recommendations);
+          setInsufficientData(res.hasInsufficientData);
+        })
+        .catch(() => {
+          // Ignore matching preview error in dashboard overview
+        })
+        .finally(() => setRecommendationsLoading(false));
     }
   }, [user]);
 
@@ -357,6 +380,91 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Phase 5: Recommended Mentors Section */}
+              <Card className="border-border/80 bg-card shadow-sm">
+                <CardHeader className="pb-3 border-b">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-bold flex items-center gap-2">
+                      <Target className="h-5 w-5 text-primary" />
+                      Recommended Mentors
+                    </CardTitle>
+                    <Link href="/mentorship/recommendations">
+                      <Button variant="ghost" size="sm" className="gap-1 text-xs text-primary">
+                        View All Recommendations <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 space-y-3">
+                  {recommendationsLoading && (
+                    <div className="py-6 flex justify-center">
+                      <Spinner className="h-6 w-6 text-primary" />
+                    </div>
+                  )}
+
+                  {!recommendationsLoading && insufficientData && (
+                    <div className="p-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/20 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-3">
+                      <span>
+                        Complete more academic and career profile details to receive higher
+                        confidence recommendations.
+                      </span>
+                      <Link href="/profile">
+                        <Button size="sm" variant="outline" className="h-7 text-xs shrink-0">
+                          Complete Profile
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
+                  {!recommendationsLoading && !insufficientData && recommendations.length === 0 && (
+                    <p className="text-xs text-muted-foreground py-3 text-center">
+                      No active mentor offerings found matching your stated preferences at this
+                      time.
+                    </p>
+                  )}
+
+                  {!recommendationsLoading && recommendations.length > 0 && (
+                    <div className="space-y-2.5">
+                      {recommendations.slice(0, 3).map(rec => (
+                        <div
+                          key={rec.offerId}
+                          className="p-3 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors flex items-center justify-between gap-3 text-xs"
+                        >
+                          <div className="space-y-0.5 overflow-hidden">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-foreground truncate">
+                                {rec.mentor.name}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] font-bold ${
+                                  rec.compatibilityScore >= 80
+                                    ? 'text-emerald-700 dark:text-emerald-300 border-emerald-300'
+                                    : 'text-blue-700 dark:text-blue-300 border-blue-300'
+                                }`}
+                              >
+                                {rec.compatibilityScore}% • {rec.matchCategory}
+                              </Badge>
+                            </div>
+                            <p className="text-muted-foreground font-medium truncate">
+                              {rec.offering.title}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground italic truncate">
+                              &ldquo;{rec.explanation.summary}&rdquo;
+                            </p>
+                          </div>
+                          <Link href="/mentorship/recommendations" className="shrink-0">
+                            <Button size="sm" variant="outline" className="h-7 text-xs">
+                              Details
+                            </Button>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>

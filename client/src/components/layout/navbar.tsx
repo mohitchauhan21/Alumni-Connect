@@ -16,6 +16,7 @@ import {
   User,
   Sparkles,
   Compass,
+  Target,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -90,6 +91,18 @@ export function Navbar() {
               >
                 <Compass className="h-4 w-4" />
                 Explore Mentorship
+              </Link>
+            )}
+
+            {/* Student Recommendations Shortcut */}
+            {user?.role === 'student' && (
+              <Link
+                href="/mentorship/recommendations"
+                id="nav-link-student-recommendations"
+                className="text-primary font-semibold flex items-center gap-1.5 transition-colors hover:text-primary/80"
+              >
+                <Target className="h-4 w-4" />
+                Recommended
               </Link>
             )}
 
@@ -227,6 +240,17 @@ export function Navbar() {
                 >
                   <Compass className="h-4 w-4" />
                   Explore Mentorship
+                </Link>
+              )}
+
+              {user?.role === 'student' && (
+                <Link
+                  href="/mentorship/recommendations"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-2 py-1"
+                >
+                  <Target className="h-4 w-4" />
+                  Recommended Mentors
                 </Link>
               )}
 

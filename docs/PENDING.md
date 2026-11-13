@@ -1,90 +1,120 @@
-# P11 — Phase 4: Pending Work
+# P11 — Phase 5: Pending Work
 
 ## Current Phase
-**Phase 4 — Student & Alumni Profiles and Mentorship Offerings (COMPLETED)**
+
+**Phase 5 — Explainable Mentor–Student Matching Engine (COMPLETED ✅)**
 
 ## Current Task
-**Phase 4 Completed. Ready for User Review and Next Phase (Phase 5).**
+
+**All Phase 5 Tasks Completed (T1–T7)** -> Ready for commit/push and transition to Phase 6.
 
 ---
 
-## Phase 4 Task Breakdown
+## Phase 5 Task Breakdown
 
-### T1 — Existing Codebase Review & Planning
-- [x] Inspect existing architecture, models, middleware, and routes
-- [x] Review Phase 1–3 documentation and tracking
-- [x] Initialize Phase 4 task breakdown in tracking files
+### T1 — Codebase Inspection and Matching Design
 
-### T2 — Database Models and Backend Services
-- [x] Create `server/src/modules/profile/studentProfile.model.ts` (with dynamic completion percentage)
-- [x] Create `server/src/modules/profile/alumniProfile.model.ts` (with draft/publish states and institutional consistency)
-- [x] Create `server/src/modules/mentorship/mentorshipOffer.model.ts` (with soft delete and discovery indexes)
-- [x] Create `server/src/modules/profile/profile.types.ts` & `server/src/modules/mentorship/mentorship.types.ts`
-- [x] Create `server/src/modules/profile/profile.service.ts`
-- [x] Create `server/src/modules/mentorship/mentorship.service.ts`
+- [x] Inspect existing schemas (`StudentProfile`, `AlumniProfile`, `MentorshipOffer`, `AlumniVerification`, `User`)
+- [x] Map existing fields to the 6 matching criteria
+- [x] Define deterministic normalization and token matching rules without external AI/NLP
+- [x] Specify normalized scoring formula: $S = \frac{\sum w_i s_i}{\sum w_i} \times 100$
+- [x] Specify data coverage calculation: $\text{Coverage} = \sum_{i \in A} w_i$
+- [x] Specify 40% minimum coverage requirement and insufficient profile data handling
+- [x] Specify 4 match categories (Strong $\ge 80$, Good $\ge 65$, Moderate $\ge 50$, Limited $< 50$)
+- [x] Document backend and frontend module structure
 
-### T3 — Profile APIs
-- [x] Create `server/src/modules/profile/profile.schemas.ts` (Zod validation for student & alumni profiles)
-- [x] Create `server/src/modules/profile/profile.controller.ts`
-- [x] Create `server/src/modules/profile/profile.router.ts` (mounted at `/api/v1/profiles`)
-- [x] Endpoints:
-  - `GET /api/v1/profiles/me`
-  - `PATCH /api/v1/profiles/me`
-  - `GET /api/v1/profiles/alumni/:userId`
+### T2 — Matching Configuration and Utility Functions
 
-### T4 — Mentorship Offering Management APIs
-- [x] Create `server/src/modules/mentorship/mentorship.schemas.ts` (Zod validation for offering creation & updates)
-- [x] Create `server/src/modules/mentorship/mentorship.controller.ts`
-- [x] Create `server/src/modules/mentorship/mentorship.router.ts` (mounted at `/api/v1/mentorship`)
-- [x] Endpoints:
-  - `POST /api/v1/mentorship/offers`
-  - `GET /api/v1/mentorship/offers/mine`
-  - `GET /api/v1/mentorship/offers/:id`
-  - `PATCH /api/v1/mentorship/offers/:id`
-  - `DELETE /api/v1/mentorship/offers/:id`
+- [x] Create `server/src/modules/matching/matching.config.ts`:
+  - 6 criteria weights strictly summing to 100%
+  - Mentorship mode compatibility matrix
+  - Recommendation thresholds (Strong/Good/Moderate/Limited)
+  - Minimum coverage threshold (40%)
+- [x] Create `server/src/modules/matching/matching.utils.ts`:
+  - Text normalization (lowercase, trim, collapse whitespace, strip punctuation)
+  - Safe token extraction with stop-word filter
+  - Array deduplication & normalized set intersection
+  - Exact token matching to prevent false substring matches (e.g. Java vs JavaScript)
+- [x] Write unit tests for matching utilities in `server/tests/matchingUtils.test.ts` (16 tests passed)
 
-### T5 — Discovery APIs
-- [x] Implement search, filter, and pagination in `GET /api/v1/mentorship/offers`
-- [x] Ensure strict discovery eligibility: active offer, verified alumnus, active account, public profile
-- [x] Support filters: topic, industry, mode, search query
+### T3 — Weighted Scoring and Explainability Engine
 
-### T6 — Frontend Implementation
-- [x] Update `client/src/lib/api.ts` with Phase 4 API methods and DTOs
-- [x] Create Student & Alumni Profile Manager (`client/src/app/profile/page.tsx`)
-- [x] Create Alumni Mentorship Offer Management page (`client/src/app/mentorship/offers/page.tsx`)
-- [x] Create Mentorship Discovery page (`client/src/app/mentorship/discover/page.tsx`)
-- [x] Create Mentorship Offer Detail view (`client/src/app/mentorship/offers/[id]/page.tsx`)
-- [x] Create Alumnus Public Profile view (`client/src/app/alumni/[id]/page.tsx`)
-- [x] Update Navbar (`client/src/components/layout/navbar.tsx`) with Explore Mentorship, My Offers, and Profile
-- [x] Update Dashboard (`client/src/app/dashboard/page.tsx`) with profile progress and mentorship offer actions
-- [x] Clean up remaining ESLint unused imports across new pages
+- [x] Create `server/src/modules/matching/matching.scoring.ts`:
+  - Criterion 1: Mentorship Topic & Career Interest Alignment (30%)
+  - Criterion 2: Skills & Expertise Alignment (25%)
+  - Criterion 3: Career Goals & Professional Domain Alignment (20%)
+  - Criterion 4: Mentorship Mode Compatibility (10%)
+  - Criterion 5: Academic Programme & Department Relevance (10%)
+  - Criterion 6: Language Compatibility (5%)
+  - Weighted overall score, assessable criteria filter, data coverage calculation
+  - Evidence and human-readable explanation generation
+  - Recommendation categorization
+- [x] Write unit tests for individual scoring criteria & coverage in `server/tests/matchingScoring.test.ts` (23 tests passed)
 
-### T7 — Testing, Verification & Documentation
-- [x] Write backend profile tests (`server/tests/profile.test.ts` — 8 test cases passing)
-- [x] Write backend mentorship offering tests (`server/tests/mentorship.test.ts` — 8 test cases passing)
-- [x] Write client smoke/component tests (`client/src/test/profile.test.tsx` — 2 test cases passing)
-- [x] Run full test suites across monorepo (79 server tests, 3 client tests passing)
-- [x] Run typecheck (`npm run typecheck` — 0 errors across server & client)
-- [x] Run lint (`npm run lint` — 0 errors, 0 warnings across server & client)
-- [x] Run format check (`npm run format:check` — clean Prettier formatting across entire monorepo)
-- [x] Run production builds (`npm run build:server` and `npm run build:client` — 13 static/dynamic routes generated cleanly)
-- [x] Update `README.md`, `docs/ARCHITECTURE.md`, `docs/PROGRESS.md`, and `docs/PENDING.md`
+### T4 — Eligibility and Matching Service
+
+- [x] Create `server/src/modules/matching/matching.types.ts`
+- [x] Create `server/src/modules/matching/matching.service.ts`:
+  - Fetch student profile by authenticated user ID
+  - Batch query joins for eligible offerings (no DB calls in loops)
+  - Enforce strict eligibility: active offer, verified alumnus, active account, published profile, soft-delete false
+  - Compute compatibility & coverage for all eligible offerings
+  - Rank by score (desc), coverage (desc), topic alignment (desc), offering ID (asc)
+  - Handle insufficient data / profile incomplete states
+  - Paginate results efficiently
+
+### T5 — Matching API Implementation
+
+- [x] Create `server/src/modules/matching/matching.schemas.ts` (Zod validation for query params)
+- [x] Create `server/src/modules/matching/matching.controller.ts`
+- [x] Create `server/src/modules/matching/matching.router.ts`:
+  - `GET /api/v1/matching/recommendations` (authenticated student)
+  - `GET /api/v1/matching/recommendations/:offerId` (detailed match breakdown)
+  - `GET /api/v1/matching/weights` (active criteria & weights)
+- [x] Mount matching router in `server/src/app.ts` at `/api/v1/matching`
+- [x] Write API integration tests in `server/tests/matchingApi.test.ts` (9 tests passed)
+
+### T6 — Frontend Recommendations Interface
+
+- [x] Update `client/src/lib/api.ts` with Phase 5 endpoints & DTOs
+- [x] Create Recommendations page (`client/src/app/mentorship/recommendations/page.tsx`) with filters, pagination, coverage indicator, and evidence breakdown
+- [x] Implement Match Details Modal for single recommendation
+- [x] Implement Matching Weights explainer modal
+- [x] Handle Loading, Empty, Insufficient Profile Data, and Error states
+- [x] Integrate "Recommended Mentors" preview section into Student Dashboard (`client/src/app/dashboard/page.tsx`)
+- [x] Add Navbar shortcut to recommendations for student users
+- [x] Write frontend component test in `client/src/test/recommendations.test.tsx` (2 tests passed)
+
+### T7 — Testing, Documentation & Final Verification
+
+- [x] Run full test suites across monorepo (`npm run test:run --workspace=server`, `npm run test:run --workspace=client`) — 127 server tests passing, 5 client tests passing.
+- [x] Run typecheck across monorepo (`npm run typecheck`) — 0 errors.
+- [x] Run linting across monorepo (`npm run lint`) — 0 errors, 0 warnings.
+- [x] Run formatting check (`npm run format:check`) — verified.
+- [x] Run production builds (`npm run build:server` and `npm run build:client`) — both passed cleanly (14 client routes generated).
+- [x] Update `docs/ARCHITECTURE.md`, `docs/PROGRESS.md`, `docs/PENDING.md`, and `README.md`.
+- [x] Report final Git status and deliverables.
 
 ---
 
 ## Outstanding Bugs
+
 _None._
 
 ## Missing Environment Configuration
+
 _None._
 
 ## Blockers Requiring Developer Action
+
 _None._
 
-## Deferred to Future Phases (Phase 5+)
-- Transparent explainable matching engine & scoring (Phase 5)
-- Mentorship applications & session scheduling (Phase 6)
+## Deferred to Future Phases (Phase 6+)
+
+- Mentorship application submission, acceptance, and rejection (Phase 6)
+- Calendar integration, session booking, and `.ics` files (Phase 6)
 - Goals, milestones, feedback rubrics & Placement Officer reports (Phase 7)
 
 ## Next Exact Task to Execute
-All Phase 4 tasks are complete and verified. Ready for user confirmation before starting Phase 5.
+
+Phase 5 is complete and verified. Await user confirmation to commit and push changes, then proceed to Phase 6: Mentorship Workflows, Application Lifecycle & Scheduling.

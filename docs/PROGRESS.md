@@ -6,11 +6,11 @@
 
 ## Current Phase
 
-**Phase 4 — Student & Alumni Profiles and Mentorship Offerings**
+**Phase 5 — Explainable Mentor–Student Matching Engine**
 
 ## Overall Phase Status
 
-✅ **Phase 4 Completed & Verified (All 7 Tasks T1–T7 passing)**
+✅ **Phase 5 Completed & Verified (All 7 Tasks T1–T7 passing)**
 
 ---
 
@@ -69,15 +69,15 @@
 
 ## Phase 4 — Completed ✅
 
-| #   | Task                                | Status  | Details                                                                                        |
-| --- | ----------------------------------- | :-----: | ---------------------------------------------------------------------------------------------- |
-| T1  | Existing Codebase Review & Planning | ✅ Done | Inspected existing schemas, auth guards, verified data flows, planned models and APIs.         |
-| T2  | Database Models & Backend Services  | ✅ Done | Created `StudentProfile`, `AlumniProfile`, and `MentorshipOffer` models, types, and services.  |
-| T3  | Profile APIs                        | ✅ Done | `/api/v1/profiles/me` (GET/PATCH) and `/api/v1/profiles/alumni/:userId` (GET).                 |
-| T4  | Mentorship Offering Management APIs | ✅ Done | `/api/v1/mentorship/offers` (POST), `/mine` (GET), `/:id` (GET/PATCH/DELETE).                  |
-| T5  | Discovery APIs                      | ✅ Done | `/api/v1/mentorship/offers` (GET) with search, filter, and pagination.                         |
-| T6  | Frontend Implementation             | ✅ Done | Student profile, alumni profile, offer management, discovery, and dashboard/navbar updates.    |
-| T7  | Testing, Verification & Docs        | ✅ Done | Vitest (79 server tests, 3 client tests), TypeScript typecheck, ESLint, Prettier, Next.js build.|
+| #   | Task                                | Status  | Details                                                                                          |
+| --- | ----------------------------------- | :-----: | ------------------------------------------------------------------------------------------------ |
+| T1  | Existing Codebase Review & Planning | ✅ Done | Inspected existing schemas, auth guards, verified data flows, planned models and APIs.           |
+| T2  | Database Models & Backend Services  | ✅ Done | Created `StudentProfile`, `AlumniProfile`, and `MentorshipOffer` models, types, and services.    |
+| T3  | Profile APIs                        | ✅ Done | `/api/v1/profiles/me` (GET/PATCH) and `/api/v1/profiles/alumni/:userId` (GET).                   |
+| T4  | Mentorship Offering Management APIs | ✅ Done | `/api/v1/mentorship/offers` (POST), `/mine` (GET), `/:id` (GET/PATCH/DELETE).                    |
+| T5  | Discovery APIs                      | ✅ Done | `/api/v1/mentorship/offers` (GET) with search, filter, and pagination.                           |
+| T6  | Frontend Implementation             | ✅ Done | Student profile, alumni profile, offer management, discovery, and dashboard/navbar updates.      |
+| T7  | Testing, Verification & Docs        | ✅ Done | Vitest (79 server tests, 3 client tests), TypeScript typecheck, ESLint, Prettier, Next.js build. |
 
 ---
 
@@ -99,10 +99,51 @@
 
 ---
 
+## Phase 5 — Completed ✅
+
+| #   | Task                                        | Status  | Details                                                                                                                                                                                                                                       |
+| --- | ------------------------------------------- | :-----: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1  | Codebase Inspection & Matching Design       | ✅ Done | Inspected existing profiles, offerings, and verification models. Designed 6 deterministic criteria strictly summing to 100%, data coverage formula, and 4-tier match categories.                                                              |
+| T2  | Matching Configuration & Utility Functions  | ✅ Done | Created `matching.config.ts` (weights, mode matrix, thresholds) and `matching.utils.ts` (text normalization, keyword tokenization with stop-word filtering, Jaccard similarity, safe token intersection). 16 unit tests passed.               |
+| T3  | Weighted Scoring & Explainability Engine    | ✅ Done | Created `matching.scoring.ts` implementing normalized scoring formula $S = \frac{\sum w_i s_i}{\sum w_i} \times 100$, dynamic assessability, coverage indicator, structured evidence explanations, strengths, and gaps. 23 unit tests passed. |
+| T4  | Eligibility & Matching Service              | ✅ Done | Created `matching.service.ts` enforcing strict 4-layer eligibility (active offer, verified alumnus, active user, published profile), batch query joins without N+1 queries, deterministic tie-breaking, and pagination.                       |
+| T5  | Matching API Implementation                 | ✅ Done | Created Zod schemas, controller, router mounted at `/api/v1/matching` with 3 endpoints (`/recommendations`, `/:offerId`, `/weights`). 9 API integration tests passed.                                                                         |
+| T6  | Frontend Recommendations Interface          | ✅ Done | Created `/mentorship/recommendations` page with filters, coverage indicator, match score pill, evidence breakdown, Match Details modal, Matching Weights modal. Added Dashboard preview & Navbar shortcut. 2 frontend tests passed.           |
+| T7  | Testing, Verification & Final Documentation | ✅ Done | Full test suites passed (127 server, 5 client), monorepo typecheck clean, lint 0 errors, Prettier formatting checked, production build passed (client & server). Updated documentation.                                                       |
+
+---
+
+## Important Architectural Decisions (Phase 5)
+
+1. **Deterministic Rule-Based Matching without Black-Box AI**:
+   - Matching relies exclusively on verifiable database attributes across student profile, alumni profile, and mentorship offerings.
+   - Zero opaque embeddings, vector databases, external AI APIs, or non-deterministic algorithms.
+2. **Normalized Scoring with Dynamic Assessability**:
+   - Scores use normalized formula $S = \frac{\sum_{i \in A} w_i s_i}{\sum_{i \in A} w_i} \times 100$, where $A$ is the set of assessable criteria based on provided student profile data.
+   - Missing student profile fields omit the criterion from the scoring denominator rather than artificially penalizing the student, while transparently reducing the separate `dataCoverage` percentage.
+3. **Strict 4-Layer Eligibility Pipeline**:
+   - Offerings are included in matching only if:
+     1. `MentorshipOffer`: `status === 'active'` and `isDeleted === false`
+     2. `User`: `accountStatus === 'active'` and `role === 'alumni'`
+     3. `AlumniVerification`: `status === 'verified'`
+     4. `AlumniProfile`: `isDraft === false` and `isPubliclyVisible === true`
+4. **Deterministic Multi-Tier Tie-Breaking**:
+   - Offerings with identical scores are sorted by:
+     1. Overall compatibility score (descending)
+     2. Profile data coverage (descending)
+     3. Topic alignment score (descending)
+     4. Offering ID (`_id` ascending)
+   - Ensures stable and reproducible ordering across paginated requests.
+5. **Auditable & Human-Readable Explanations**:
+   - Every recommendation generates structured evidence: matched topics, matched skills, career overlap, delivery mode compatibility, academic departmental proximity, and spoken language overlap.
+   - Provides student users with top matching strengths and potential gaps/trade-offs.
+
+---
+
 ## Last Completed Task
 
-**T7 — Testing, Verification & Documentation**
+**T7 — Testing, Documentation & Final Verification (Phase 5)**
 
 ## Next Phase
 
-**Phase 5 — Explainable Matching Engine (Rule-weighted scoring without black-box AI)**
+**Phase 6 — Mentorship Workflows, Application Lifecycle & Scheduling**

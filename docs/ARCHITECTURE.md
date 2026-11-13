@@ -204,15 +204,15 @@ Pino is configured with high-performance serialization and automated field maski
 
 ## 10. Implementation Status & Phase Roadmap
 
-|    Phase    | Milestone                         | Scope / Components                                                                                  |    Status    |
-| :---------: | :-------------------------------- | :-------------------------------------------------------------------------------------------------- | :----------: |
-| **Phase 1** | **Project Foundation**            | Monorepo structure, Express API, Next.js UI, security headers, health check, logging, documentation | **COMPLETE** |
-| **Phase 2** | **Authentication & RBAC**         | User model, JWT cookie sessions, bcrypt hashing, role authorization middleware, AuthContext         | **COMPLETE** |
-| **Phase 3** | **Alumni Verification (M1)**      | CSV/ERP graduate matching, manual review officer dashboard, verification status                     | **COMPLETE** |
-| **Phase 4** | **Profiles & Mentorship Offerings** | Student academic/career profiles, verified alumni professional profiles, offerings & discovery | **COMPLETE** |
-| **Phase 5** | **Explainable Matching (M4)**     | Transparent rule-weighted scoring algorithm (no black-box AI), match explanations                   |  _Planned_   |
-| **Phase 6** | **Mentorship Workflows (M5, M6)** | Requests, acceptance/rejection, `.ics` calendar generation, session tracking                        |  _Planned_   |
-| **Phase 7** | **Goals & Analytics (M7, M10)**   | Milestones, action items, feedback rubrics, Placement Officer reporting                             |  _Planned_   |
+|    Phase    | Milestone                            | Scope / Components                                                                                  |    Status    |
+| :---------: | :----------------------------------- | :-------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 1** | **Project Foundation**               | Monorepo structure, Express API, Next.js UI, security headers, health check, logging, documentation | **COMPLETE** |
+| **Phase 2** | **Authentication & RBAC**            | User model, JWT cookie sessions, bcrypt hashing, role authorization middleware, AuthContext         | **COMPLETE** |
+| **Phase 3** | **Alumni Verification (M1)**         | CSV/ERP graduate matching, manual review officer dashboard, verification status                     | **COMPLETE** |
+| **Phase 4** | **Profiles & Mentorship Offerings**  | Student academic/career profiles, verified alumni professional profiles, offerings & discovery      | **COMPLETE** |
+| **Phase 5** | **Explainable Matching Engine (M4)** | Deterministic 6-criteria weighted scoring (no black-box AI), data coverage, evidence breakdown      | **COMPLETE** |
+| **Phase 6** | **Mentorship Workflows (M5, M6)**    | Requests, acceptance/rejection, `.ics` calendar generation, session tracking                        |  _Planned_   |
+| **Phase 7** | **Goals & Analytics (M7, M10)**      | Milestones, action items, feedback rubrics, Placement Officer reporting                             |  _Planned_   |
 
 ---
 
@@ -261,23 +261,27 @@ Every verification lifecycle event (`VERIFICATION_SUBMITTED`, `VERIFICATION_RESU
 ## 12. Phase 4 Architecture: Profiles, Mentorship Offerings & Discovery
 
 ### 12.1 Student Profile Management
+
 - **Model**: `StudentProfile` (`userId` unique index).
 - **Academic & Career Fields**: Programme, department, graduation year, academic interests, technical/professional skills, career interests, career goals, mentorship topics, preferred mode (`online`, `in-person`, `hybrid`), and short bio.
 - **Dynamic Completion Calculation**: Evaluated strictly on the backend across 4 categories (Academic identity: 30%, Skills & Interests: 30%, Goals & Bio: 20%, Mentorship Preferences: 20%). Returned dynamically with `GET /api/v1/profiles/me`.
 
 ### 12.2 Alumni Professional Profile Management
+
 - **Model**: `AlumniProfile` (`userId` unique index).
 - **Professional Identity**: Professional headline, current designation, company, industry domain, years of experience, bio, skills, areas of expertise, mentorship topics, preferred modes, draft state (`isDraft`), and public visibility (`isPubliclyVisible`).
 - **Institutional Immutability**: Degree credentials (`alumniId`, `institutionalEmail`, `programme`, `department`, `graduationYear`) are projected as read-only from the approved `AlumniVerification` record. Alumni cannot modify official degree records.
 - **Publishing Guard**: An alumnus cannot publish (`isDraft: false` or `isPubliclyVisible: true`) unless their `AlumniVerification.status === 'verified'` and `User.accountStatus === 'active'`.
 
 ### 12.3 Mentorship Offer Creation & Lifecycle
+
 - **Model**: `MentorshipOffer` (compound discovery indexes: `status`, `isDeleted`, `alumniId`, `topics`, `mode`).
 - **Offering Schema**: Title, description, topics, target audience, session mode (`online`, `in-person`, `hybrid`), duration (15–180 minutes), and monthly mentee capacity limit.
 - **Lifecycle & Soft Deletion**: Offerings can transition between `active`, `paused`, and `closed`. Deletion is strictly soft (`isDeleted: true`), preserving historical auditability and preventing orphan references.
 - **Alumni Ownership & Guard**: Only verified active alumni can create or modify offerings; ownership is verified prior to update or deletion.
 
 ### 12.4 Mentorship Discovery Engine
+
 - **Endpoint**: `GET /api/v1/mentorship/offers` (available to all authenticated users).
 - **Strict Discovery Criteria**: Offers must satisfy:
   1. `MentorshipOffer.isDeleted === false` and `MentorshipOffer.status === 'active'`.
@@ -286,3 +290,57 @@ Every verification lifecycle event (`VERIFICATION_SUBMITTED`, `VERIFICATION_RESU
   4. `User.accountStatus === 'active'`.
 - **Search & Filtering**: Keyword search across title, description, and topics with regex sanitization; filtering by topic, industry, and session mode; standard backend pagination (`page`, `limit`, `totalPages`, `totalCount`).
 
+---
+
+## 13. Phase 5 Architecture: Explainable Mentor–Student Matching Engine
+
+### 13.1 Philosophy & Zero Black-Box Guarantee
+
+The matching engine is entirely deterministic and mathematically transparent. It uses zero external NLP services, generative AI, embeddings, or vector databases. All calculations are executed synchronously on normalized database tokens, guaranteeing identical outputs for identical inputs regardless of request timing or order.
+
+### 13.2 6-Criteria Weighted Scoring Model
+
+Scoring is divided into six dimensions totaling 100%:
+
+| Criterion                                   | Weight | Assessment Inputs                                                                | Scoring Logic                                                                |
+| :------------------------------------------ | :----: | :------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- |
+| **1. Mentorship Topics & Career Interests** |  30%   | Student topics/interests vs. Offering topics + Mentor expertise                  | Set intersection ratio of normalized tokens ($                               | matched | /   | studentTopics | $)  |
+| **2. Skills & Technical Expertise**         |  25%   | Student skills vs. Mentor skills + Areas of expertise                            | Set intersection ratio of normalized tokens                                  |
+| **3. Career Goals & Industry Domain**       |  20%   | Student career goals text & interests vs. Mentor industry, headline, designation | Keyword extraction & token overlap; bonus for exact industry alignment       |
+| **4. Mentorship Delivery Mode**             |  10%   | Student preferred mode vs. Offering delivery mode                                | Fixed compatibility matrix (Exact: 1.0, Hybrid partial: 0.75, Conflict: 0.0) |
+| **5. Academic Department & Programme**      |  10%   | Student department/programme vs. Authoritative verified alumni records           | Exact programme & department: 1.0; Single field match: 0.5; None: 0.0        |
+| **6. Language Compatibility**               |   5%   | Student preferred languages vs. Mentor supported languages                       | Set intersection overlap ratio                                               |
+
+### 13.3 Dynamic Score Normalization & Data Coverage
+
+1. **Dynamic Normalization Formula**:
+   $$S = \frac{\sum_{i \in A} (w_i \times s_i)}{\sum_{i \in A} w_i} \times 100$$
+   Where $A$ is the set of assessable criteria. Missing student preferences are never counted as successful matches and are excluded from the denominator.
+2. **Data Coverage Percentage**:
+   $$\text{Coverage} = \sum_{i \in A} w_i$$
+   Reflects the proportion of criteria that could be evaluated.
+3. **Minimum Evidence Threshold**:
+   A configurable threshold (`MIN_DATA_COVERAGE_THRESHOLD = 40%`) flags recommendations as having insufficient profile data, returning guidance prompts to the student rather than false high-confidence scores.
+4. **Recommendation Categories**:
+   - $\ge 80\%$: `Strong Match`
+   - $\ge 65\%$: `Good Match`
+   - $\ge 50\%$: `Moderate Match`
+   - $< 50\%$: `Limited Match`
+
+### 13.4 Strict 4-Layer Backend Eligibility
+
+Before scoring, all candidate offerings must pass a strict 4-layer validation query:
+
+1. `MentorshipOffer`: `status === 'active'` and `isDeleted === false`.
+2. `User` (mentor): `accountStatus === 'active'` and `role === 'alumni'`.
+3. `AlumniVerification`: `status === 'verified'` (ensuring authoritative institutional identity).
+4. `AlumniProfile`: `isDraft === false` and `isPubliclyVisible === true`.
+
+### 13.5 Deterministic Ranking & Tie-Breaking
+
+Ranked candidates are sorted using strict priority:
+
+1. Compatibility score descending
+2. Data coverage percentage descending
+3. Topic alignment criterion score descending
+4. Stable tie-breaker: `offerId` string comparison ascending

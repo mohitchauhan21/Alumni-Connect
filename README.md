@@ -100,6 +100,10 @@ npm run dev
   - `GET /api/v1/mentorship/offers/:id` — View details of a specific mentorship offering
   - `PATCH /api/v1/mentorship/offers/:id` — Update mentorship offering (owner only)
   - `DELETE /api/v1/mentorship/offers/:id` — Soft-delete mentorship offering (owner only)
+- **Matching & Recommendation Endpoints (Phase 5)**:
+  - `GET /api/v1/matching/recommendations` — Retrieve personalized, ranked mentor recommendations with compatibility scores and evidence
+  - `GET /api/v1/matching/recommendations/:offerId` — Detailed 6-criteria score breakdown and explanation for a specific offering
+  - `GET /api/v1/matching/weights` — Active criteria weights, threshold, and recommendation category boundaries
 - **Officer & Admin Verification Endpoints**:
   - `GET /api/v1/verification/officer/metrics` — Aggregate counters (pending, verified, rejected)
   - `GET /api/v1/verification/officer/queue` — Filterable, paginated verification review queue
@@ -319,8 +323,22 @@ All scripts are cross-platform and work seamlessly in Windows PowerShell and Com
 - [x] Navigation bar and Dashboard enhancements with quick links, profile completion indicators, and role-specific shortcuts.
 - [x] Comprehensive test suites: 79 backend tests and frontend Vitest component tests passing.
 
-### Upcoming in Phase 5 (Explainable Matching Engine):
+### Completed in Phase 5 (Explainable Mentor–Student Matching Engine):
 
-- [ ] Transparent rule-weighted scoring algorithm (no black-box AI).
-- [ ] Match breakdown and compatibility scoring between students and active alumni offerings.
-- [ ] Placement Officer cohort match reports.
+- [x] Transparent rule-weighted scoring algorithm (no black-box AI, zero external NLP/LLM dependencies).
+- [x] 6-criteria multi-dimensional scoring model: Topics (30%), Skills (25%), Career Goals/Domain (20%), Mode (10%), Academic Department (10%), Languages (5%).
+- [x] Strict normalized scoring formula with assessable criteria filter: $S = \frac{\sum w_i s_i}{\sum w_i} \times 100$.
+- [x] Separate data coverage metric ($\text{Coverage} = \sum w_i$) with 40% minimum evidence requirement.
+- [x] Robust token-level text normalization preventing false substring matches (e.g. Java vs. JavaScript).
+- [x] Strict 4-layer eligibility verification (active offering, active user, verified alumni record, published profile).
+- [x] Deterministic ranking (score desc, coverage desc, topic alignment desc, offer ID asc).
+- [x] Explainable evidence breakdown for each criterion with matched terms, unmatched values, and plain-English summaries.
+- [x] Student recommendations page (`/mentorship/recommendations`) with filters, coverage indicator, match details modal, and weights explainer.
+- [x] Student dashboard integration with top recommended offerings and profile completion prompt on insufficient evidence.
+- [x] Comprehensive test suites: 127 server tests and 5 client tests passing.
+
+### Upcoming in Phase 6 (Mentorship Workflows & Scheduling):
+
+- [ ] Mentorship application submission, acceptance, and rejection workflows.
+- [ ] Session booking, capacity reservation, and `.ics` calendar invitation generation.
+- [ ] Student mentee tracking and session status management.

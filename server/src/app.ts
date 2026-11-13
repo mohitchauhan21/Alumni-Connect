@@ -12,6 +12,7 @@ import { authRouter } from './modules/auth/auth.router.js';
 import { verificationRouter } from './modules/verification/verification.router.js';
 import { profileRouter } from './modules/profile/profile.router.js';
 import { mentorshipRouter } from './modules/mentorship/mentorship.router.js';
+import { matchingRouter } from './modules/matching/matching.router.js';
 
 export function createApp(): Express {
   const app = express();
@@ -48,6 +49,7 @@ export function createApp(): Express {
   app.use('/api/v1/verification', verificationRouter);
   app.use('/api/v1/profiles', profileRouter);
   app.use('/api/v1/mentorship', mentorshipRouter);
+  app.use('/api/v1/matching', matchingRouter);
 
   // 404 handler for unknown routes
   app.use(notFoundHandler);
