@@ -47,8 +47,6 @@ export function selfUser(u: Doc) {
     notificationPrefs: u.notificationPrefs ?? { email: true, sms: false },
     emailVerified: !!u.emailVerifiedAt,
     mfaEnabled: !!u.mfaEnabled,
-    // Only accounts created by sign-up carry the flag; it clears once onboarding is done.
-    needsOnboarding: u.onboardingPending === true && (u.role === 'student' || u.role === 'alumnus'),
     createdAt: iso(u.createdAt),
   };
 }

@@ -30,12 +30,13 @@ export default {
         /** Always-dark backdrop for overlays (does not switch). */
         night: '#000000',
         /**
-         * The accent: Apple's system blue. This one scale is the whole accent colour of the site;
-         * change it here to re-colour every link, button and selection.
+         * The accent: Mentor Bridge orange. 500 is the logo's orange; 600 (buttons, small text) is
+         * deepened so white text on it, and it on white, both pass WCAG AA (4.5:1). This one scale is
+         * the whole accent colour of the site; change it here to re-colour every link and button.
          */
-        brand: { 50: '#eef6ff', 100: '#dcecff', 200: '#b8d8ff', 300: '#84bcff', 400: '#3d97ff', 500: '#0a84ff', 600: '#0071e3', 700: '#0066cc', 800: '#0051a3', 900: '#003d7a' },
-        /** Secondary accent for the odd gradient (Apple indigo). */
-        iris: { 300: '#b9b8ff', 400: '#8e8cf5', 500: '#5e5ce6', 600: '#4b49c8' },
+        brand: { 50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#cf4a06', 700: '#b23f08', 800: '#9a3412', 900: '#7c2d12' },
+        /** Secondary accent for the odd gradient (rose, so orange → rose reads as one warm sweep). */
+        iris: { 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' },
         /** Success: accepted, paid, verified, open capacity. Kept apart from the accent on purpose. */
         ok: { 50: '#ecf9f0', 100: '#d3f2dd', 200: '#a8e3bb', 300: '#6fd08f', 400: '#34c759', 500: '#28b44c', 600: '#1f9a3f', 700: '#248a3d', 800: '#1d6e31', 900: '#175727' },
       },
@@ -44,7 +45,7 @@ export default {
       boxShadow: {
         card: 'var(--shadow-card)',
         depth: 'var(--shadow-depth)',
-        glow: '0 0 0 1px rgba(0,113,227,.25), 0 8px 28px -6px rgba(0,113,227,.35)',
+        glow: '0 0 0 1px rgba(207,74,6,.25), 0 8px 28px -6px rgba(249,115,22,.35)',
         btn: '0 1px 2px rgba(0,0,0,.08)',
       },
       keyframes: {

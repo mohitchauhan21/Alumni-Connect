@@ -49,7 +49,7 @@ describe('Sign in with Google', () => {
     expect((await api().get('/api/auth/providers')).body).toEqual({ google: true });
   });
 
-  it('creates a new student account, sets the session cookie and sends them to onboarding', async () => {
+  it('creates a new student account, sets the session cookie and sends them to their profile', async () => {
     const res = await signIn('student', { sub: 'g-1', email: 'Asha.Rao@gmail.com', name: 'Asha Rao' });
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe('http://localhost:3000/student/profile?welcome=1');

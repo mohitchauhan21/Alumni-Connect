@@ -1,7 +1,7 @@
 
 import { SiteFooter } from '@/components/SiteFooter';
 
-export const metadata = { title: 'Privacy statement', description: 'Exactly what other people can see about you on Alumni Mentor Network, and what they never can.' };
+export const metadata = { title: 'Privacy statement', description: 'Exactly what other people can see about you on Mentor Bridge, and what they never can.' };
 
 const STUDENT_VISIBLE = [
   ['Name', 'Full name as registered'],

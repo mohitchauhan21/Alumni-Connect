@@ -1,19 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-  <!-- Alumni Mentor Network mark. Keep in sync with src/components/Logo.tsx (MARK). -->
-  <style>
-    .tile { fill: #1d1d1f; } .ink { stroke: #f5f5f7; } .dot { fill: #f5f5f7; }
-    @media (prefers-color-scheme: dark) { .tile { fill: #f5f5f7; } .ink { stroke: #1d1d1f; } .dot { fill: #1d1d1f; } }
-  </style>
-  <defs>
-    <mask id="gap" maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="48">
-      <rect width="48" height="48" fill="#fff"/>
-      <circle cx="24" cy="13.4" r="7.6" fill="#000"/>
-    </mask>
-  </defs>
-  <rect class="tile" width="48" height="48" rx="13"/>
-  <g class="ink" mask="url(#gap)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M13 37A30 30 0 0 1 24 16A30 30 0 0 1 35 37" stroke-width="4.4"/>
-    <path d="M14.4 30.2Q24 25.2 33.6 30.2" stroke-width="3.4"/>
-  </g>
-  <circle class="dot" cx="24" cy="13.4" r="4.9"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Mentor Bridge mark. Keep in sync with src/components/Logo.tsx (MARK). -->
+  <rect width="32" height="32" rx="9" fill="#F97316"/>
+  <path d="M6 22c3-7 7-10 10-10s7 3 10 10" fill="none" stroke="#18181b" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M10 22v-4M16 22v-7M22 22v-4" fill="none" stroke="#18181b" stroke-width="2.2" stroke-linecap="round"/>
 </svg>

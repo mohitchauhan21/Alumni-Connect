@@ -96,7 +96,7 @@ export default function ReceiptPage() {
             </div>
           )}
         </div>
-        <footer className="border-t border-[color:var(--line)] px-6 py-4 text-[12px] text-ink-500">Alumni Mentor Network · Payments are processed by the payment gateway; card details are never stored by the platform.</footer>
+        <footer className="border-t border-[color:var(--line)] px-6 py-4 text-[12px] text-ink-500">Mentor Bridge · Payments are processed by the payment gateway; card details are never stored by the platform.</footer>
       </article>
     </div>
   );

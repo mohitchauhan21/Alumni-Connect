@@ -42,7 +42,7 @@ export const env = {
   /** Run cron jobs inside the API process (default when no dedicated worker is deployed). */
   jobsInProcess: bool(process.env.JOBS_IN_PROCESS, true),
 
-  appName: 'Alumni Mentor Network',
+  appName: 'Mentor Bridge',
 
   /** Block key actions (sending mentorship requests, submitting alumni verification) until the email is confirmed. */
   requireEmailVerification: bool(process.env.REQUIRE_EMAIL_VERIFICATION, !isTest),
@@ -68,7 +68,7 @@ export const env = {
   outboxDir: process.env.OUTBOX_DIR ?? path.resolve('outbox'),
 
   smtpUrl: process.env.SMTP_URL ?? '',
-  mailFrom: process.env.MAIL_FROM ?? 'Alumni Mentor Network <no-reply@alumni.example.edu>',
+  mailFrom: process.env.MAIL_FROM ?? 'Mentor Bridge <no-reply@alumni.example.edu>',
 
   twilioSid: process.env.TWILIO_ACCOUNT_SID ?? '',
   twilioToken: process.env.TWILIO_AUTH_TOKEN ?? '',

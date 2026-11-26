@@ -1044,7 +1044,7 @@ canvas.gf-art[data-ready] { opacity: 1; filter: none; }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 0 0 .5px rgba(0, 0, 0, .1), 0 22px 40px -12px rgba(10, 12, 20, .42);
   transition-delay: 0s;
 }
-.gf-sheet:focus-visible { outline: 2px solid #4c8dff; outline-offset: 2px; }
+.gf-sheet:focus-visible { outline: 2px solid #fb923c; outline-offset: 2px; }
 .gf-sheet-art {
   position: absolute;
   left: 0;
@@ -1229,7 +1229,7 @@ canvas.gf-sheet-art[data-ready] { opacity: 1; filter: none; }
 }
 .gf-key:hover { transform: translateY(-2px); }
 .gf-key:active { transform: translateY(0) scale(.93); transition-duration: .12s; }
-.gf-key:focus-visible { outline: 2px solid #4c8dff; outline-offset: 3px; }
+.gf-key:focus-visible { outline: 2px solid #fb923c; outline-offset: 3px; }
 .gf-key--add {
   color: #fff;
   background: radial-gradient(120% 90% at 50% 0%, #3a3a3f 0%, #121214 55%, #050506 100%);

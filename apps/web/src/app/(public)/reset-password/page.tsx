@@ -71,7 +71,7 @@ function ResetForm() {
 function Title() {
   const invite = useSearchParams().get('invite') === '1';
   return (
-    <AuthFrame title={invite ? 'Welcome! Choose your password' : 'Choose a new password'} subtitle={invite ? 'You’ve been invited to manage Alumni Mentor Network.' : undefined}>
+    <AuthFrame title={invite ? 'Welcome! Choose your password' : 'Choose a new password'} subtitle={invite ? 'You’ve been invited to manage Mentor Bridge.' : undefined}>
       <ResetForm />
     </AuthFrame>
   );

@@ -210,7 +210,7 @@ function Dashboard() {
             <AnimatedList
               key={pending.map((p) => p.id).join(',')}
               theme={theme}
-              accentColor="#0071e3"
+              accentColor="#cf4a06"
               width="100%"
               maxHeight={560}
               gap={6}
@@ -315,7 +315,7 @@ function Dashboard() {
 
                   <div className="flex flex-col gap-2 border-t border-[color:var(--line)] bg-ink-50/40 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <div className="flex gap-2">
-                      <ClickSpark sparkColor={['#0071e3', '#5e5ce6', '#34c759']} sparkCount={12} sparkRadius={26} className="!h-auto !w-auto">
+                      <ClickSpark sparkColor={['#cf4a06', '#f43f5e', '#34c759']} sparkCount={12} sparkRadius={26} className="!h-auto !w-auto">
                         <button className="btn-brand px-5" disabled={full || busy === selected.id} onClick={() => accept(selected)}>
                           {busy === selected.id ? <Spinner /> : <Check size={15} />} Accept
                           <span className="kbd ml-1 border-white/30 bg-white/15 text-white shadow-none">A</span>

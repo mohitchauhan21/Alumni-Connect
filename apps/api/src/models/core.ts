@@ -20,10 +20,6 @@ const userSchema = new Schema(
     role: { type: String, enum: ROLES, required: true, index: true },
     status: { type: String, enum: ['active', 'suspended', 'deleted'], default: 'active' },
     deletedAt: Date, // set when the person erased their account; the record stays as an anonymous placeholder
-    // First-run onboarding: set true only on accounts created by sign-up (email or Google), cleared
-    // once it is finished or skipped. Older and seeded accounts never have it, so they never see it.
-    onboardingPending: Boolean,
-    onboardedAt: Date,
     notificationPrefs: {
       email: { type: Boolean, default: true },
       sms: { type: Boolean, default: false },

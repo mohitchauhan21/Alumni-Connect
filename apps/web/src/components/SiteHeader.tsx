@@ -16,7 +16,7 @@ import { cx } from './ui';
 const SECTIONS = ['product', 'roles', 'how'];
 
 /**
- * Which navbar item is current: the landing section in view, the privacy page, or none.
+ * Which navbar item is current: the landing section in view, or none.
  * A click pins its item at once; the scroll tracker then waits until the smooth scroll has
  * stopped, so the pill goes straight to the clicked item instead of hopping through the others.
  */
@@ -74,8 +74,7 @@ function useActiveIndex(path: string) {
     requestAnimationFrame(check);
   };
 
-  const privacy = SITE_NAV.findIndex((l) => l.href === '/privacy');
-  const active = path === '/privacy' ? privacy : path === '/' ? (pinned ?? section) : -1;
+  const active = path === '/' ? (pinned ?? section) : -1;
   return { active, pin };
 }
 
@@ -135,7 +134,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-[color:var(--line)] bg-canvas/75 backdrop-blur-2xl backdrop-saturate-150">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-5 sm:px-6">
-        <Link href="/" className="flex" aria-label="Alumni Mentor Network home">
+        <Link href="/" className="flex" aria-label="Mentor Bridge home">
           <Logo size={26} compact />
         </Link>
 

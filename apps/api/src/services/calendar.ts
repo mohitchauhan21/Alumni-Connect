@@ -168,7 +168,7 @@ export function buildIcs(uid: string, ev: EventInput): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Alumni Mentor Network//EN',
+    'PRODID:-//Mentor Bridge//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

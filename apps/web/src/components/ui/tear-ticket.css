@@ -65,7 +65,7 @@
 }
 
 .tear-ticket__piece--stub:focus-visible .tear-ticket__paper--stub {
-  box-shadow: inset 0 0 0 2px #0a84ff;
+  box-shadow: inset 0 0 0 2px #f97316;
 }
 
 .tear-ticket__edge {

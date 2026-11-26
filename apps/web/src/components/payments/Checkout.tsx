@@ -119,7 +119,7 @@ export function Checkout({ session, open, onClose, onPaid }: { session: SessionT
         customer_id: c.customerId ?? undefined,
         save: 1, // offer "save this card" (RBI-compliant tokenisation by Razorpay)
         prefill: c.prefill,
-        theme: { color: '#0071e3' },
+        theme: { color: '#cf4a06' },
         handler: async (resp: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
           setBusy(true);
           try {

@@ -123,5 +123,4 @@ export const SITE_NAV: SiteLink[] = [
   { href: '/#product', label: 'Product' },
   { href: '/#roles', label: 'Who it’s for' },
   { href: '/#how', label: 'How it works' },
-  { href: '/privacy', label: 'Privacy' },
 ];

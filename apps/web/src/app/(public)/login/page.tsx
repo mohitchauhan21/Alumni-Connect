@@ -148,7 +148,7 @@ function LoginForm() {
       <form onSubmit={submitCode} className="space-y-4">
         <div className="flex items-start gap-3 rounded-xl bg-brand-50 px-3.5 py-3 text-[13px] text-brand-900 ring-1 ring-inset ring-brand-200">
           <ShieldCheck size={17} className="mt-0.5 shrink-0" />
-          <p>{useRecovery ? 'Enter one of the recovery codes you saved when you set up two-factor sign-in. Each code works once.' : 'Open your authenticator app and enter the 6-digit code for Alumni Mentor Network.'}</p>
+          <p>{useRecovery ? 'Enter one of the recovery codes you saved when you set up two-factor sign-in. Each code works once.' : 'Open your authenticator app and enter the 6-digit code for Mentor Bridge.'}</p>
         </div>
         <ErrorBox message={error} />
         <CodeInput value={code} onChange={setCode} autoFocus recovery={useRecovery} />

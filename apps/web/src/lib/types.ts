@@ -1,7 +1,7 @@
 export type Role = 'student' | 'alumnus' | 'aro' | 'placement' | 'admin';
 
 export interface Me {
-  user: { id: string; name: string; email: string; phone: string | null; avatarUrl?: string | null; role: Role; timezone: string; notificationPrefs: { email: boolean; sms: boolean }; emailVerified: boolean; mfaEnabled: boolean; needsOnboarding?: boolean };
+  user: { id: string; name: string; email: string; phone: string | null; avatarUrl?: string | null; role: Role; timezone: string; notificationPrefs: { email: boolean; sms: boolean }; emailVerified: boolean; mfaEnabled: boolean };
   profile: { studentProfileId?: string | null; profileComplete?: boolean; alumnusId?: string | null; verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected' };
   security: {
     hasPassword: boolean;

@@ -4,7 +4,7 @@
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Design system: quiet and minimal, in the spirit of Apple's own sites.
-   Neutral greys carry the page, one accent (system blue) marks what you can act
+   Neutral greys carry the page, one accent (Mentor Bridge orange) marks what you can act
    on, green means success. Big type, generous space, soft surfaces, and motion
    only where it explains a change. Light and dark themes; the theme is a `dark`
    class on <html> (lib/theme.tsx). Everything honours prefers-reduced-motion.
@@ -33,7 +33,7 @@
   --sidebar: #f5f5f7;
   --line: rgba(0, 0, 0, 0.07);
   --line-strong: rgba(0, 0, 0, 0.13);
-  --ring: rgba(0, 113, 227, 0.32);
+  --ring: rgba(207, 74, 6, 0.32);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.03), 0 6px 20px -10px rgba(0, 0, 0, 0.1);
   --shadow-depth: 0 2px 6px rgba(0, 0, 0, 0.04), 0 22px 44px -18px rgba(0, 0, 0, 0.22);
   --dots: rgba(0, 0, 0, 0.06);
@@ -45,10 +45,10 @@
   --color-foreground: rgb(var(--ink-900));
   --color-card: rgb(var(--surface));
   --color-card-foreground: rgb(var(--ink-900));
-  --color-primary: #0071e3;
+  --color-primary: #cf4a06;
   --color-primary-foreground: #ffffff;
   --color-border: var(--line-strong);
-  --color-ring: #0071e3;
+  --color-ring: #cf4a06;
   --color-glass-highlight: #ffffff;
   --color-glass-shadow: #000000;
   --color-muted-foreground: rgb(var(--ink-500));
@@ -74,15 +74,15 @@
   --sidebar: #0a0a0b;
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.14);
-  --ring: rgba(41, 151, 255, 0.4);
+  --ring: rgba(251, 146, 60, 0.4);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
   --shadow-depth: 0 2px 6px rgba(0, 0, 0, 0.4), 0 22px 44px -18px rgba(0, 0, 0, 0.8);
   --dots: rgba(255, 255, 255, 0.05);
   --page-hex: #000000;
 
-  --color-primary: #2997ff;
+  --color-primary: #fb923c;
   --color-primary-foreground: #000000;
-  --color-ring: #2997ff;
+  --color-ring: #fb923c;
   --color-glass-highlight: #ffffff;
   --color-glass-shadow: #000000;
 }
@@ -106,7 +106,7 @@ html.theme-switching *::after {
 }
 
 ::selection {
-  background: rgba(0, 113, 227, 0.2);
+  background: rgba(207, 74, 6, 0.2);
 }
 
 /* Subtle dot texture (kept for a few product surfaces). */
@@ -135,9 +135,9 @@ html.theme-switching *::after {
   .btn {
     @apply relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13.5px] font-medium transition-[background-color,color,transform,box-shadow] duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[color:var(--ring)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100;
   }
-  /* The one blue action on a screen. */
+  /* The one orange action on a screen. Hover deepens (not lightens) so white text stays legible. */
   .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-500;
+    @apply btn bg-brand-600 text-white hover:bg-brand-700;
   }
   .btn-brand {
     @apply btn-primary;
@@ -205,16 +205,16 @@ html.theme-switching *::after {
    become translucent tints with light text, so they keep their meaning
    without glowing. Listed explicitly: these are the tints the app uses.
    ───────────────────────────────────────────────────────────────────────────── */
-.dark .bg-brand-50 { background-color: rgb(10 132 255 / 0.15); }
-.dark .bg-brand-50\/40, .dark .hover\:bg-brand-50\/40:hover { background-color: rgb(10 132 255 / 0.08); }
-.dark .hover\:bg-brand-50:hover { background-color: rgb(10 132 255 / 0.18); }
-.dark .bg-brand-100 { background-color: rgb(10 132 255 / 0.2); }
-.dark .text-brand-600, .dark .hover\:text-brand-600:hover { color: #2997ff; }
-.dark .text-brand-700, .dark .hover\:text-brand-700:hover { color: #2997ff; }
-.dark .text-brand-800, .dark .hover\:text-brand-800:hover { color: #64b0ff; }
-.dark .text-brand-900 { color: #a8d1ff; }
-.dark .ring-brand-200 { --tw-ring-color: rgb(10 132 255 / 0.3); }
-.dark .border-brand-200 { border-color: rgb(10 132 255 / 0.3); }
+.dark .bg-brand-50 { background-color: rgb(249 115 22 / 0.15); }
+.dark .bg-brand-50\/40, .dark .hover\:bg-brand-50\/40:hover { background-color: rgb(249 115 22 / 0.08); }
+.dark .hover\:bg-brand-50:hover { background-color: rgb(249 115 22 / 0.18); }
+.dark .bg-brand-100 { background-color: rgb(249 115 22 / 0.2); }
+.dark .text-brand-600, .dark .hover\:text-brand-600:hover { color: #fb923c; }
+.dark .text-brand-700, .dark .hover\:text-brand-700:hover { color: #fb923c; }
+.dark .text-brand-800, .dark .hover\:text-brand-800:hover { color: #fdba74; }
+.dark .text-brand-900 { color: #fed7aa; }
+.dark .ring-brand-200 { --tw-ring-color: rgb(249 115 22 / 0.3); }
+.dark .border-brand-200 { border-color: rgb(249 115 22 / 0.3); }
 
 .dark .bg-ok-50 { background-color: rgb(52 199 89 / 0.14); }
 .dark .text-ok-700, .dark .text-ok-800 { color: #4cd964; }
@@ -242,8 +242,8 @@ html.theme-switching *::after {
 .dark .ring-violet-200 { --tw-ring-color: rgb(191 90 242 / 0.3); }
 
 /* decorative pastel blobs */
-.dark .from-brand-50 { --tw-gradient-from: rgb(10 132 255 / 0.12) var(--tw-gradient-from-position); --tw-gradient-to: rgb(10 132 255 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
-.dark .from-brand-200\/60 { --tw-gradient-from: rgb(10 132 255 / 0.22) var(--tw-gradient-from-position); --tw-gradient-to: rgb(10 132 255 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.dark .from-brand-50 { --tw-gradient-from: rgb(249 115 22 / 0.12) var(--tw-gradient-from-position); --tw-gradient-to: rgb(249 115 22 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.dark .from-brand-200\/60 { --tw-gradient-from: rgb(249 115 22 / 0.22) var(--tw-gradient-from-position); --tw-gradient-to: rgb(249 115 22 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 .dark .to-violet-50 { --tw-gradient-to: rgb(94 92 230 / 0.12) var(--tw-gradient-to-position); }
 .dark .to-violet-200\/50 { --tw-gradient-to: rgb(94 92 230 / 0.2) var(--tw-gradient-to-position); }
 
@@ -283,31 +283,58 @@ html {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   First-visit intro (components/IntroSplash.tsx). A script in <head> sets
-   data-intro on <html> before paint when this browser hasn't seen it, so the
-   cover is there from the first frame and the page never flashes underneath.
-   ───────────────────────────────────────────────────────────────────────────── */
-.intro-cover {
-  display: none;
-}
-html[data-intro] .intro-cover {
-  display: block;
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: var(--page-hex);
-}
-html[data-intro] body {
-  overflow: hidden;
-}
-
-
 /* Readable long-form text on legal pages (components/LegalPage.tsx). */
 .legal h2 { margin-top: 2.5rem; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; color: rgb(var(--ink-900)); }
 .legal h2:first-child { margin-top: 0; }
 .legal p, .legal li { margin-top: 0.75rem; font-size: 15.5px; line-height: 1.7; color: rgb(var(--ink-600)); }
 .legal ul { margin-top: 0.5rem; list-style: disc; padding-left: 1.25rem; }
-.legal a { color: #0066cc; text-decoration: underline; text-underline-offset: 3px; }
-.dark .legal a { color: #2997ff; }
+.legal a { color: #b23f08; text-decoration: underline; text-underline-offset: 3px; }
+.dark .legal a { color: #fb923c; }
 .legal strong { color: rgb(var(--ink-900)); font-weight: 600; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Landing page motion (components/landing). Split headings start hidden so the
+   unsplit text never flashes; GSAP shows them once split. The failsafe shows them
+   after 2.5 s regardless, and reduced motion never hides them at all.
+   ───────────────────────────────────────────────────────────────────────────── */
+.split-pending {
+  visibility: hidden;
+  animation: split-failsafe 0s 2.5s forwards;
+}
+@keyframes split-failsafe {
+  to { visibility: visible; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .split-pending { visibility: visible; animation: none; }
+}
+/* SplitText masks each word; leave room for descenders and the gradient's italics-free overhang. */
+.split-word { padding-bottom: 0.08em; margin-bottom: -0.08em; }
+
+/* Spotlight cards: a 1px edge that lights up under the pointer. */
+.spotlight-edge {
+  padding: 1px;
+  background: radial-gradient(260px circle at var(--sx, 50%) var(--sy, 0%), rgba(207, 74, 6, 0.55), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.dark .spotlight-edge {
+  background: radial-gradient(260px circle at var(--sx, 50%) var(--sy, 0%), rgba(251, 146, 60, 0.7), transparent 70%);
+}
+
+/* Outlined display text (the second marquee row). */
+.text-outline {
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: max(1px, 0.022em) rgb(var(--ink-400));
+}
+
+/* The scroll cue under the hero. */
+@keyframes scroll-cue {
+  0% { transform: translateY(0); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(12px); opacity: 0; }
+}
+.scroll-cue { animation: scroll-cue 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue { animation: none; }
+}

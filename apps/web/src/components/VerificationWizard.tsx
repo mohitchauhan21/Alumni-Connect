@@ -83,7 +83,7 @@ export function VerificationWizard({ v, departments, onDone }: { v: any; departm
             onStepChange={(n) => setStep(n)}
             onFinalStepCompleted={submit}
             theme={theme}
-            accentColor="#0071e3"
+            accentColor="#cf4a06"
             width="100%"
             frame={false}
             linear

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { LegalPage } from '@/components/LegalPage';
 import { SITE } from '@/lib/site';
 
-export const metadata = { title: 'Terms of service', description: 'The terms for using Alumni Mentor Network.' };
+export const metadata = { title: 'Terms of service', description: 'The terms for using Mentor Bridge.' };
 
 /*
  * DRAFT written from how the platform works. Have it reviewed (ideally by a lawyer) before launch,

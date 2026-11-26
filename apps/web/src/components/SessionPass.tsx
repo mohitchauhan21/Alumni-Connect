@@ -75,7 +75,7 @@ export function SessionPass({ meeting, withName, mentorshipId }: { meeting: Meet
                   Live now
                 </span>
               ) : (
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-brand-600 dark:text-[#2997ff]">Session pass · {relTime(start.toISOString())}</span>
+                <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-brand-600 dark:text-[#fb923c]">Session pass · {relTime(start.toISOString())}</span>
               )}
               <p className="mt-2 truncate text-[22px] font-semibold leading-tight tracking-[-0.03em]">{meeting.title || 'Mentoring session'}</p>
               <p className="mt-1 truncate text-[13px] opacity-60">

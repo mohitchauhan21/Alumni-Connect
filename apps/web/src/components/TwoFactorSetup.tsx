@@ -26,7 +26,7 @@ export function CodeInput({ value, onChange, autoFocus, recovery = false }: { va
 /** Recovery codes, shown once, with copy and download. */
 export function RecoveryCodes({ codes, onDone, doneLabel = 'I’ve saved them' }: { codes: string[]; onDone: () => void; doneLabel?: string }) {
   const [copied, setCopied] = useState(false);
-  const text = `Alumni Mentor Network recovery codes\nEach code works once. Keep them somewhere safe.\n\n${codes.join('\n')}\n`;
+  const text = `Mentor Bridge recovery codes\nEach code works once. Keep them somewhere safe.\n\n${codes.join('\n')}\n`;
   return (
     <div>
       <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 px-3.5 py-3 text-[13px] text-amber-900 ring-1 ring-inset ring-amber-200">

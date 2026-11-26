@@ -3,12 +3,12 @@ import Link from 'next/link';
 import { LegalPage } from '@/components/LegalPage';
 import { SITE } from '@/lib/site';
 
-export const metadata = { title: 'Contact', description: 'Get in touch with Alumni Mentor Network — support, and bringing the platform to your institution.' };
+export const metadata = { title: 'Contact', description: 'Get in touch with Mentor Bridge — support, and bringing the platform to your institution.' };
 
 export default function ContactPage() {
   const mail = (subject: string) => (SITE.email ? `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}` : undefined);
   const cards = [
-    { icon: Building2, title: 'For institutions', body: 'Bring verified alumni mentorship to your campus. We’ll set up your programme, import your alumni register and onboard your Alumni Relations team.', cta: 'Talk to us', href: mail('Bringing Alumni Mentor Network to our institution') },
+    { icon: Building2, title: 'For institutions', body: 'Bring verified alumni mentorship to your campus. We’ll set up your programme, import your alumni register and onboard your Alumni Relations team.', cta: 'Talk to us', href: mail('Bringing Mentor Bridge to our institution') },
     { icon: LifeBuoy, title: 'Support', body: 'Trouble signing in, a payment or refund question, or something not working? Include your account email and, for payments, the payment reference.', cta: 'Get help', href: mail('Support request') },
   ];
   return (

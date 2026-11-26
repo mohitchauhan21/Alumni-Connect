@@ -110,7 +110,7 @@ export async function upsertGoogleUser(profile: GoogleProfile, role: 'student' |
     if (role === 'student' && env.googleStudentDomains.length && !env.googleStudentDomains.includes(profile.email.split('@')[1])) {
       throw new GoogleAuthError('student_domain_required');
     }
-    user = await User.create({ name: profile.name, email: profile.email, role, googleSub: profile.sub, avatarUrl: profile.picture, onboardingPending: true });
+    user = await User.create({ name: profile.name, email: profile.email, role, googleSub: profile.sub, avatarUrl: profile.picture });
     if (role === 'student') await StudentProfile.create({ user: user._id });
     else await Alumnus.create({ user: user._id, verificationStatus: 'unverified' });
     created = true;

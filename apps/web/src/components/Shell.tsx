@@ -14,7 +14,6 @@ import type { Notice, Role } from '@/lib/types';
 import { EmailBanner, StaffMfaGate } from './AccountNotices';
 import { openCommandPalette } from './CommandPalette';
 import { LogoMark } from './Logo';
-import { Onboarding } from './Onboarding';
 import { PageTransition } from './motion';
 import { Avatar, PageLoader, cx, useToast } from './ui';
 
@@ -163,7 +162,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
           <Link href={homeFor(role)} className="flex items-center gap-2" aria-label="Home">
             <LogoMark size={26} />
-            <span className="text-[15px] font-semibold tracking-[-0.02em]">Alumni Mentor</span>
+            <span className="text-[15px] font-semibold tracking-[-0.02em]">Mentor Bridge</span>
           </Link>
           <button className="btn-ghost ml-auto p-2" onClick={openCommandPalette} aria-label="Search">
             <Search size={19} />
@@ -176,8 +175,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* first-run onboarding: new accounts only, once */}
-      <AnimatePresence>{me.user.needsOnboarding && <Onboarding key="onboarding" />}</AnimatePresence>
     </div>
   );
 }
@@ -246,7 +243,7 @@ function Sidebar({
           <LogoMark size={30} />
           {!rail && (
             <span className="min-w-0 leading-tight">
-              <span className="block truncate text-[14px] font-semibold tracking-[-0.015em]">Alumni Mentor</span>
+              <span className="block truncate text-[14px] font-semibold tracking-[-0.015em]">Mentor Bridge</span>
               <span className="block truncate text-[11.5px] text-ink-500">{ROLE_LABEL[role]}</span>
             </span>
           )}

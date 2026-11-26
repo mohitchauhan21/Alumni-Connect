@@ -8,7 +8,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
         <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
           <h1 style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-0.03em', margin: 0 }}>Something went wrong.</h1>
           <p style={{ color: '#6e6e73', marginTop: 12 }}>Please reload the page. If it keeps happening, let us know.</p>
-          <button onClick={reset} style={{ marginTop: 24, background: '#0071e3', color: '#fff', border: 0, borderRadius: 999, padding: '10px 22px', fontSize: 15, cursor: 'pointer' }}>
+          <button onClick={reset} style={{ marginTop: 24, background: '#cf4a06', color: '#fff', border: 0, borderRadius: 999, padding: '10px 22px', fontSize: 15, cursor: 'pointer' }}>
             Try again
           </button>
         </main>
