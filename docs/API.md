@@ -38,7 +38,7 @@ Gates: `403 email_unverified` on `POST /requests` and `POST /alumni/verify` unti
 | Method | Path | Roles | Notes |
 |---|---|---|---|
 | GET | `/alumni/me` | M | own profile, capacity, availability, latest verification |
-| PUT | `/alumni/me` | M | professional profile (academic fields locked after verification) |
+| PUT | `/alumni/me` | M | professional profile (academic fields locked after verification); `meetLink` sets the mentor's own Google Meet room (`''` removes it; updates upcoming sessions) |
 | POST | `/alumni/verify` | M | multipart: `fullName, rollNumber, graduationYear, degree, department, dateOfBirth?, documents[]` (≤3 × 5 MB PDF/JPG/PNG/WEBP) |
 | GET | `/alumni/verify` | M | own verification history |
 | GET | `/alumni/verify/queue?status=` | R A | queue with record comparison + contact details |
@@ -123,6 +123,11 @@ Socket.IO (`/socket.io`, cookie or `auth.token`): client → `join(mentorshipId)
 | GET | `/admin/users?role=&q=` | A | |
 | PATCH | `/admin/users/:id` | A | status / role |
 | GET | `/admin/audit?action=&entityId=` | R A | |
+
+## Background jobs
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| POST | `/jobs/:group` | `?key=` or `x-cron-key` = `CRON_SECRET` | runs a job group for a host scheduler: `frequent` (request expiry, session reminders, payment holds), `hourly` (action-item reminders, pause auto-resume), `weekly` (engagement check). 404 unless `CRON_SECRET` is set; 401 on a wrong key. Answers `{group, ok, results[]}` |
 
 ## M10 — Analytics
 | GET | `/analytics/programme?from=&to=` | R A P | participation, requests, sessions, goals, utilisation, engagement, satisfaction, trends |

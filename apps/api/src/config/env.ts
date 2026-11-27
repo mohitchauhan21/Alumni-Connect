@@ -33,6 +33,11 @@ export const env = {
   embeddedMongoPort: Number(process.env.EMBEDDED_MONGO_PORT ?? 27027),
   embeddedMongoDir: process.env.EMBEDDED_MONGO_DIR ?? defaultEmbeddedDir,
   seedOnEmpty: bool(process.env.SEED_ON_EMPTY, true),
+  /**
+   * A public showcase running on purpose-seeded demo data (made-up people and addresses). Email is
+   * written to the outbox instead of being sent, so nothing reaches the made-up addresses.
+   */
+  hostedDemo: bool(process.env.HOSTED_DEMO, false),
 
   jwtSecret: process.env.JWT_SECRET ?? 'dev-only-insecure-secret-change-me',
   jwtTtl: process.env.JWT_TTL ?? '7d',
@@ -41,6 +46,8 @@ export const env = {
 
   /** Run cron jobs inside the API process (default when no dedicated worker is deployed). */
   jobsInProcess: bool(process.env.JOBS_IN_PROCESS, true),
+  /** Key for POST /api/jobs/:group, which a host scheduler calls to run jobs on demand. Empty turns it off. */
+  cronSecret: process.env.CRON_SECRET ?? '',
 
   appName: 'Mentor Bridge',
 

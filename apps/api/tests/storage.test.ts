@@ -172,4 +172,25 @@ describe('production config checks', () => {
     expect(productionConfigProblems({ ...good, paymentGateway: 'test' as const }).errors.join()).toContain('PAYMENT_GATEWAY=test');
     expect(productionConfigProblems({ ...good, razorpay: { ...good.razorpay, webhookSecret: '' } }).errors.join()).toContain('RAZORPAY_WEBHOOK_SECRET');
   });
+  it('a hosted demo needs no email, and must not send any', () => {
+    const demo = {
+      ...prod,
+      hostedDemo: true,
+      jwtSecret: 'x'.repeat(48),
+      mongoUri: 'mongodb+srv://cluster.example.net/amn',
+      webOrigin: 'https://demo.example.app',
+      publicApiUrl: 'https://demo.example.app',
+      cookieSecure: true,
+      dataEncryptionKey: Buffer.alloc(32, 7).toString('base64'),
+      smtpUrl: '',
+      storageDriver: 's3' as const,
+      s3: { ...env.s3, bucket: 'amn-docs' },
+      seedOnEmpty: false,
+      paymentGateway: 'off' as const,
+    };
+    const ok = productionConfigProblems(demo);
+    expect(ok.errors).toEqual([]);
+    expect(ok.warnings.join()).toContain('HOSTED_DEMO');
+    expect(productionConfigProblems({ ...demo, smtpUrl: 'smtps://u:p@smtp.example.net' }).errors.join()).toContain('HOSTED_DEMO');
+  });
 });

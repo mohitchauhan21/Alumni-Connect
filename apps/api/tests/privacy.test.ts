@@ -70,6 +70,7 @@ function assertNoSecrets(label: string, body: unknown, list = secrets) {
 /** Substitute real ids into a route path. Every `:param` must be replaced (asserted by callers). */
 function fill(path: string): string {
   return path
+    .replace('/jobs/:group', '/jobs/frequent')
     .replace('/students/me/goals/:id', `/students/me/goals/${ids.careerGoal}`)
     .replace('/payments/methods/:id', `/payments/methods/${ids.paymentMethod}`)
     .replace('/payments/:id', `/payments/${ids.payment}`)

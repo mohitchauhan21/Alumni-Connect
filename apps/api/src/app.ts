@@ -9,6 +9,7 @@ import { errorHandler, leakGuard } from './middleware/common.js';
 import adminRoutes from './routes/admin.js';
 import alumniRoutes from './routes/alumni.js';
 import analyticsRoutes from './routes/analytics.js';
+import jobRoutes from './routes/jobs.js';
 import authRoutes from './routes/auth.js';
 import calendarRoutes from './routes/calendar.js';
 import mentorRoutes from './routes/mentors.js';
@@ -58,6 +59,7 @@ export function createApp() {
   api.use('/payments', paymentRoutes);
   api.use('/admin', adminRoutes);
   api.use('/analytics', analyticsRoutes);
+  api.use('/jobs', jobRoutes);
   app.use('/api', api);
 
   app.use('/api', (_req, res) => res.status(404).json({ error: { code: 'not_found', message: 'Endpoint not found' } }));

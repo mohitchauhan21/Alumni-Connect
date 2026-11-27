@@ -24,8 +24,13 @@ export function productionConfigProblems(e: Env = liveEnv): { errors: string[]; 
   if (!e.dataEncryptionKey) errors.push('DATA_ENCRYPTION_KEY is required: it encrypts two-factor keys (openssl rand -base64 32)');
   else if (Buffer.from(e.dataEncryptionKey, 'base64').length !== 32) errors.push('DATA_ENCRYPTION_KEY must decode to exactly 32 bytes (openssl rand -base64 32)');
 
-  if (!e.smtpUrl) errors.push('SMTP_URL is required: password reset, email confirmation and notifications all send email');
-  if (/example\.(edu|com)/i.test(e.mailFrom)) errors.push('MAIL_FROM must be a real sender address on your own domain');
+  if (e.hostedDemo) {
+    warnings.push('HOSTED_DEMO is on: this is a showcase on demo data. Email is written to the outbox, not sent');
+    if (e.smtpUrl) errors.push('HOSTED_DEMO must not send email (the demo accounts use made-up addresses): unset SMTP_URL');
+  } else {
+    if (!e.smtpUrl) errors.push('SMTP_URL is required: password reset, email confirmation and notifications all send email');
+    if (/example\.(edu|com)/i.test(e.mailFrom)) errors.push('MAIL_FROM must be a real sender address on your own domain');
+  }
 
   if (e.storageDriver === 's3') {
     if (!e.s3.bucket) errors.push('STORAGE_DRIVER=s3 needs S3_BUCKET');

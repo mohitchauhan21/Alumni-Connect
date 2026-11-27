@@ -1,357 +1,351 @@
-# Alumni Mentor Network
+<div align="center">
 
-**Verified Alumni Mentorship Matching and Engagement Platform** — P11, Track J (Next.js + Node.js + MongoDB).
+<img src="apps/web/src/app/icon.svg" width="72" height="72" alt="Mentor Bridge logo" />
 
-Verifies alumni against institutional records, matches students to mentors with explained relevance, and supports the whole mentoring relationship (requests → sessions → goals → feedback) while **protecting mentors' time** and **never exposing alumni contact details to students**.
+# Mentor Bridge
+
+**Verified alumni mentorship for institutions: mentoring that respects everyone's time.**
+
+[**Live demo →**](https://mentorbridge.antideploy.app) &nbsp;·&nbsp; [Quick start](#quick-start) &nbsp;·&nbsp; [Demo accounts](#demo-accounts) &nbsp;·&nbsp; [Deployment](#deployment) &nbsp;·&nbsp; [API](docs/API.md)
+
+Next.js 15 · React 19 · Express · MongoDB · Socket.IO · TypeScript
+
+</div>
 
 ---
+
+Mentor Bridge connects students with alumni of their own institution. Alumni are **verified against the institution's records** before students can see them, students get **ranked matches with the reasons spelled out**, and the whole relationship (request → sessions → goals → feedback) happens on the platform, while **mentors' time is protected** and **nobody's email or phone number ever changes hands**.
+
+Built for P11, Track J (verified alumni mentorship matching and engagement).
 
 ## Contents
 
-1. [Quick start (5 minutes)](#1-quick-start-5-minutes)
-2. [Demo accounts & what to try](#2-demo-accounts--what-to-try)
-3. [What you need to set up (and what you don't)](#3-what-you-need-to-set-up-and-what-you-dont)
-4. [Optional integrations, step by step](#4-optional-integrations-step-by-step)
-   - [Accounts & security](#accounts--security)
-5. [Architecture](#5-architecture)
-6. [Feature map (spec → code)](#6-feature-map-spec--code)
-7. [Testing](#7-testing)
-8. [Deployment](#8-deployment) (including the [go-live checklist](#go-live-checklist))
-9. [Scripts](#9-scripts)
-10. [Known limitations / not yet verified](#10-known-limitations--not-yet-verified)
+- [What it does](#what-it-does)
+- [Live demo](#live-demo)
+- [Quick start](#quick-start)
+- [Demo accounts](#demo-accounts)
+- [Configuration](#configuration)
+- [Optional integrations](#optional-integrations)
+- [Accounts and security](#accounts-and-security)
+- [Architecture](#architecture)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Design](#design)
+- [Scripts](#scripts)
+- [Known limitations](#known-limitations)
 
----
+## What it does
 
-## 1. Quick start (5 minutes)
+| For | What they get |
+|---|---|
+| **Students** | A career profile (goals, target roles, interests, help wanted), mentors ranked by fit with plain-language reasons, only mentors with open capacity, requests that are always answered (or expire after 7 days and point to other matches), sessions with a live countdown and a one-tap Join, goals, action items and feedback. |
+| **Alumni mentors** | Verification against the alumni register, hard limits on mentees and open requests, a pause switch, a keyboard-driven inbox (accept or decline in one key), optional session fees, their own Google Meet room, and contact details that are never shown. |
+| **Institutions** | A verification queue with field-by-field comparison and an audit trail, weekly engagement health checks with automatic nudges, mentor-load warnings, and programme and placement reports with no personal data. |
 
-**Prerequisites:** [Node.js 20+](https://nodejs.org) (tested on 22.19) and Git. Nothing else — no database install needed.
+**The privacy rule that runs through everything:** alumni contact details (email, phone, LinkedIn) never reach a student, in any API response or socket message. Contact details typed into messages are hidden before they're saved. This is enforced in layers and proved by a test that calls every API route (see [Testing](#testing)). The field-by-field statement is in [`docs/PRIVACY.md`](docs/PRIVACY.md).
+
+## Live demo
+
+**https://mentorbridge.antideploy.app** is a hosted demo running on purpose-made demo data.
+
+- Open **Sign in** and pick a role under **Try a demo account**, or use any account from the [table below](#demo-accounts) with the password `Demo@1234`.
+- It's a showcase, so **email isn't sent** (messages go to a log), **payments are off**, and staff accounts don't need two-factor sign-in.
+- Anyone can sign in as any demo account, including the administrator, so the data can change. It can be reset at any time (see [Scripts](#scripts)).
+- After a quiet period the first page can take a few seconds while the app wakes up.
+
+## Quick start
+
+**You need:** [Node.js 20 or newer](https://nodejs.org) and Git. No database to install.
 
 ```bash
+git clone https://github.com/mohitchauhan21/Alumni-Connect.git
+cd Alumni-Connect
 npm install
-```
-
-```bash
 npm run dev
 ```
 
 Open **http://localhost:3000**.
 
-On first start the API downloads a MongoDB binary (~600 MB, one time only), starts it **embedded**, and loads the demo data set automatically. Data persists in `%LOCALAPPDATA%\alumni-mentor-network\mongo-data` (Windows) or `~/.local/share/alumni-mentor-network/mongo-data` — deliberately **outside** the project folder, because OneDrive/Dropbox sync corrupts live database files.
-
-| Service | URL |
-|---------|-----|
-| Web app | http://localhost:3000 |
+| Service | Address |
+|---|---|
+| Website | http://localhost:3000 |
 | API | http://localhost:4000/api |
 | Health check | http://localhost:4000/api/health |
 
-To wipe and reload the demo data at any time (stop `npm run dev` first):
+**What happens on first start:** with no `MONGODB_URI` set, the API starts its own **embedded MongoDB** (7.0.24, downloaded once and cached in `~/.cache/mongodb-binaries`) and loads the demo data automatically. The data is kept in `%LOCALAPPDATA%\alumni-mentor-network\mongo-data` on Windows or `~/.local/share/alumni-mentor-network/mongo-data` elsewhere: deliberately outside the project folder, because OneDrive and Dropbox corrupt live database files.
 
-```bash
-npm run seed
-```
+To use MongoDB Atlas instead, see [Database](#database).
 
-## 2. Demo accounts & what to try
+**Run one side only:** `npm run dev:api` or `npm run dev:web`, from the repository root (not from inside `apps/`).
 
-All demo accounts use the password **`Demo@1234`** (defined in `apps/api/src/seed/data.ts`).
+## Demo accounts
 
-The sign-in page has a **Try a demo account** panel: tap a role and its email and password are filled in, then press **Sign in**. The panel shows in development only; a production build hides it unless `NEXT_PUBLIC_DEMO_LOGINS=true` is set for a hosted demo that was seeded on purpose.
+Every demo account uses the password **`Demo@1234`** (set in `apps/api/src/seed/data.ts`). The sign-in page's **Try a demo account** panel fills them in for you. It shows in development, and in a production build only when `NEXT_PUBLIC_DEMO_LOGINS=true`.
 
-| Email | Role | Try this |
-|-------|------|----------|
-| `student@demo.edu` | Student (Aarav Sharma) | Dashboard → **Find a mentor** (ranked matches with reasons, facets, capacity, fee) → open a mentor → **Request mentorship**. Open your mentorship → **Messages** and type an email address: it is hidden. **Payments** shows three saved cards in a wallet and the payment history; pick a time on a session Priya proposes to pay ₹499 through the test gateway. |
-| `mentor@demo.edu` | Verified alumni mentor (Priya Nair) | 3 pending requests, 1 open slot. **Accept** one → you're now full and Accept is disabled. **Decline** with an optional reason, or **Decline all**. **Pause** new requests. Charges ₹499 per session: **Earnings** shows what students paid and her share; **Profile → Session fee** changes it. |
-| `newalumni@demo.edu` | Registered, unverified alumna | **Profile & verification** → submit roll number `2018CS901`, name *Rhea Kapoor*, year 2018, B.Tech, Computer Science & Engineering, DOB 1996-04-12 → exact record match. |
-| `aro@demo.edu` | Alumni Relations Officer | **Verification queue** (approve Rhea, compare fields, open documents), **Engagement health** (nudge), **Mentor capacity** (overload warnings), **Programme report**. |
-| `placement@demo.edu` | Placement Officer | Read-only programme report incl. mentoring ↔ placement correlation. |
-| `admin@demo.edu` | Administrator | **Programme settings**: matching weights, throttle limits, request expiry, engagement thresholds, paid sessions (on/off, platform fee, fee cap, refund cutoff). **Payments**: every payment, with refunds. Users, audit log. |
+| Email | Who | Try this |
+|---|---|---|
+| `student@demo.edu` | Student (Aarav Sharma) | **Find a mentor**: ranked matches with reasons, filters and capacity → open a mentor → **Request mentorship**. Your next session counts down on **Home**. In a mentorship's **Messages**, type an email address: it's hidden. |
+| `mentor@demo.edu` | Verified mentor (Priya Nair) | **Home** has 3 pending requests and 1 open slot. **Accept** one and you're full. **Decline** with a reason, or **Decline all**. **Pause** new requests. **Profile → Video calls** sets your own Google Meet room. **Earnings** shows session fees. |
+| `newalumni@demo.edu` | Registered, unverified alumna | **Profile & verification**: submit roll number `2018CS901`, name *Rhea Kapoor*, year 2018, B.Tech, Computer Science & Engineering, date of birth 1996-04-12 → an exact record match. |
+| `aro@demo.edu` | Alumni Relations Officer | **Verification queue** (compare fields, open documents, approve), **Engagement health** (nudge), **Mentor capacity** (overload warnings), **Programme report**. |
+| `placement@demo.edu` | Placement Officer | A read-only programme report, including mentoring ↔ placement correlation. |
+| `admin@demo.edu` | Administrator | **Programme settings** (matching weights, throttle limits, request expiry, engagement thresholds, paid sessions), **Payments** with refunds, users, audit log. |
 
-Seed contents: **60 verified alumni** (each matched to an institutional record with an approval audit trail), 6 pending verifications (some with mismatches), 46 students, 26 mentorships with ~5 months of sessions, goals, action items, messages, feedback and weekly engagement snapshots, 45 requests in every state, and placement outcomes.
+**The demo data:** 60 verified alumni (each matched to an institutional record with an approval trail), 6 pending verifications (some with mismatches), 46 students, 26 mentorships with about five months of sessions, goals, action items, messages, feedback and weekly engagement snapshots, 45 requests in every state, and placement outcomes.
 
-## 3. What you need to set up (and what you don't)
+## Configuration
 
-| Thing | Needed to run? | Default without setup |
-|-------|---------------|----------------------|
-| Node.js 20+ | **Yes** | — |
-| MongoDB | No | Embedded MongoDB, auto-started |
-| `.env` files | No | Sensible defaults (see `apps/api/.env.example`) |
+Everything has a working default for local development. The full list, with comments, is in [`apps/api/.env.example`](apps/api/.env.example) and [`apps/web/.env.example`](apps/web/.env.example). Put API settings in `apps/api/.env` (Git ignores it).
+
+| Thing | Needed locally? | Without it |
+|---|---|---|
+| Node.js 20+ | **Yes** | |
+| MongoDB | No | Embedded MongoDB, started automatically |
 | Email (SMTP) | No | Every email is written to `apps/api/outbox/*.json` so you can read it |
 | SMS (Twilio) | No | Written to `apps/api/outbox/` |
-| Google / Outlook calendar | No | Every session has an **.ics download**; "Connect calendar" shows *Not enabled on this server* |
-| Video calls | No | A unique Jitsi Meet link per session (no account needed), or the mentor's own Google Meet room if they add one in **Profile → Video calls** |
-| Docker | No | Only for the production-style setup in §8 |
+| Google / Outlook calendar | No | Every session has an **.ics** download |
+| Video calls | No | A unique Jitsi room per session, or the mentor's own Google Meet room |
+| Docker | No | Only for the Docker setups under [Deployment](#deployment) |
 
-**For production you must set:** `JWT_SECRET`, `MONGODB_URI`, `DATA_ENCRYPTION_KEY`, `SMTP_URL`, `MAIL_FROM`, `COOKIE_SECURE=true`, and https:// values for `WEB_ORIGIN` and `PUBLIC_API_URL`. The API checks these at startup and refuses to run without them, listing exactly what is missing. See the [go-live checklist](#go-live-checklist).
+**In production** (`NODE_ENV=production`) the API checks its settings at startup and refuses to run if anything required is missing or still a development value, listing exactly what to fix: `JWT_SECRET`, `MONGODB_URI`, `DATA_ENCRYPTION_KEY`, `COOKIE_SECURE=true`, `https://` values for `WEB_ORIGIN` and `PUBLIC_API_URL`, and email (`SMTP_URL`, `MAIL_FROM`) unless `HOSTED_DEMO=true`.
 
-## 4. Optional integrations, step by step
+## Optional integrations
 
-Create `apps/api/.env` from the template first:
+### Database
 
-```bash
-cp apps/api/.env.example apps/api/.env
-```
+Set `MONGODB_URI` in `apps/api/.env` and restart the API. The embedded database is skipped whenever it's set.
 
-### 4.1 Real MongoDB (Docker)
+- **MongoDB Atlas:** create a cluster and a database user, allow your IP address under **Network Access**, and use the `mongodb+srv://…` string with a database name, for example `…mongodb.net/amn`. An empty database is filled with demo data on the first start in development.
+- **Local Docker:** `docker compose up -d mongo`, then `MONGODB_URI=mongodb://localhost:27017/amn`.
 
-1. Start Docker Desktop.
-2. Run `docker compose up -d mongo`.
-3. Set `MONGODB_URI=mongodb://localhost:27017/amn` in `apps/api/.env`.
-4. Run `npm run seed`, then `npm run dev`.
+> **Careful:** `npm run seed` wipes and reloads **whichever database `MONGODB_URI` points at**, including Atlas.
 
-**MongoDB Atlas instead:** create a free cluster, add a database user, allow your IP, copy the `mongodb+srv://…` string into `MONGODB_URI`.
+### Email (SMTP)
 
-### 4.2 Email (SMTP)
+1. Pick any SMTP provider. For Gmail, turn on 2-step verification and create an **App password** at https://myaccount.google.com/apppasswords.
+2. Set `SMTP_URL=smtps://you%40gmail.com:APP_PASSWORD@smtp.gmail.com:465` (`%40` stands for `@`) and `MAIL_FROM`.
+3. Restart the API.
 
-1. Pick any SMTP provider. For Gmail: enable 2-step verification, then create an **App password** at https://myaccount.google.com/apppasswords.
-2. Set `SMTP_URL=smtps://your.address%40gmail.com:APP_PASSWORD@smtp.gmail.com:465` (note `%40` for `@`).
-3. Set `MAIL_FROM`.
-4. Restart the API.
+### SMS (Twilio)
 
-### 4.3 SMS (Twilio)
+Set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM`. People opt in under **Settings → SMS reminders**; only session reminders and confirmations go by SMS.
 
-1. Create a Twilio account and get a phone number.
-2. Set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM`.
-3. Users opt in under **Settings → SMS reminders**. Only session reminders and confirmations go by SMS.
+### Video calls
 
-### 4.4 Google sign-in, Google Calendar and Google Meet
+- **Default:** every confirmed session gets its own Jitsi Meet room. No account needed.
+- **A mentor's own Google Meet room:** under **Profile → Video calls**, a mentor pastes a link like `meet.google.com/abc-defg-hij`. Sessions they confirm use it, and saving it updates their upcoming sessions; clearing it gives those sessions fresh Jitsi rooms. Only real Meet room codes are accepted, and the link stays private: students only receive it as the join link of their own confirmed sessions.
+- **Generated Google Meet links:** with Google Calendar connected (below) and `VIDEO_PROVIDER=google_meet`, sessions get a Meet link created in the participant's calendar.
 
-One Google OAuth client powers "Continue with Google" **and** calendar sync.
+### Google sign-in and Google Calendar
 
+One Google OAuth client powers both **Continue with Google** and calendar sync.
 
-
-1. Go to https://console.cloud.google.com → create a project → **APIs & Services → Library** → enable **Google Calendar API**.
-2. **OAuth consent screen** → External → add the scopes `openid`, `email`, `profile` and `.../auth/calendar.events` → add yourself as a test user.
-3. **Credentials → Create credentials → OAuth client ID** → *Web application*.
-4. Add **both** authorised redirect URIs:
+1. In https://console.cloud.google.com create a project and enable the **Google Calendar API**.
+2. **OAuth consent screen:** External, with the scopes `openid`, `email`, `profile` and `.../auth/calendar.events`; add yourself as a test user.
+3. **Credentials → OAuth client ID → Web application**, with two redirect URIs:
    - `http://localhost:4000/api/auth/google/callback` (sign-in)
    - `http://localhost:4000/api/calendar/google/callback` (calendar)
 
    In production use `{PUBLIC_API_URL}/api/auth/google/callback` and `{PUBLIC_API_URL}/api/calendar/google/callback`.
-5. Put the client ID and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
-6. Optional: set `VIDEO_PROVIDER=google_meet` to use Meet links instead of Jitsi.
-7. Optional: set `GOOGLE_STUDENT_DOMAINS=students.your-institution.edu` so new **student** accounts created via Google must use an institution address. Alumni can use any verified Google account, because they are verified against records afterwards.
-8. Restart the API. The **Continue with Google** button activates on the sign-in and sign-up pages, and calendar sync appears under **Settings → Calendar → Connect**.
+4. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, and restart the API.
+5. Optional: `GOOGLE_STUDENT_DOMAINS=students.your-college.edu` makes new **student** Google accounts use an institution address. Alumni can use any Google account, because they're verified against records afterwards.
 
-How Google sign-in behaves:
-- Only Google-verified email addresses are accepted.
-- If an account with the same email already exists, it is linked to Google and keeps its role.
-- New users pick Student or Alumnus on the sign-up page before continuing to Google.
-- The flow uses a signed state plus a nonce cookie (CSRF and replay protection), and the ID token is checked for audience, issuer, expiry and nonce.
+Only Google-verified addresses are accepted. An existing account with the same email is linked and keeps its role. The flow uses a signed state and a nonce cookie, and the ID token is checked for audience, issuer, expiry and nonce.
 
-### 4.5 Outlook / Microsoft 365 calendar
+### Outlook / Microsoft 365 calendar
 
-1. Go to https://entra.microsoft.com → **App registrations → New registration**.
-2. Choose *Accounts in any organizational directory and personal Microsoft accounts* (or your tenant only).
-3. Add the redirect URI (Web) `http://localhost:4000/api/calendar/outlook/callback`.
-4. **Certificates & secrets → New client secret**.
-5. **API permissions** → Microsoft Graph → Delegated → `Calendars.ReadWrite`, `OnlineMeetings.ReadWrite` and `offline_access`.
-6. Set `MS_CLIENT_ID`, `MS_CLIENT_SECRET` and `MS_TENANT` (`common`, or your tenant ID).
-7. Restart the API → **Settings → Calendar → Connect**.
+1. In https://entra.microsoft.com, **App registrations → New registration**, with the redirect URI (Web) `http://localhost:4000/api/calendar/outlook/callback`.
+2. Create a client secret, and add the delegated Microsoft Graph permissions `Calendars.ReadWrite`, `OnlineMeetings.ReadWrite` and `offline_access`.
+3. Set `MS_CLIENT_ID`, `MS_CLIENT_SECRET` and `MS_TENANT` (`common` or your tenant ID), and restart the API.
 
-### 4.6 Institutional records (ERP)
+### Institutional records
 
-Staff open **Institution records → Import CSV** with the columns `rollNumber,fullName,graduationYear,degree,department[,dateOfBirth]`. Existing roll numbers are updated. For a live ERP sync, call `POST /api/alumni/records/import` from a scheduled job with a staff token.
+Staff upload the alumni register under **Institution records → Import CSV**, with the columns `rollNumber,fullName,graduationYear,degree,department[,dateOfBirth]`. Existing roll numbers are updated. For a live sync from an ERP, call `POST /api/alumni/records/import` on a schedule with a staff token.
 
-### 4.7 Paid sessions (Razorpay)
+### Paid sessions (Razorpay)
 
-Mentors can charge a fee per session (Profile → Session fee; 0 = free). When a time is picked for a paid session, the slot is **held for 30 minutes** and the student pays; once paid, the session is confirmed with its video link. Unpaid holds are released by a background job.
+Mentors can charge per session (**Profile → Session fee**; 0 is free). When a student picks a time for a paid session, the slot is held for 30 minutes while they pay; once paid, the session is confirmed with its video link.
 
-- **Development** uses a built-in **test gateway** (`PAYMENT_GATEWAY=test`, the default): no money moves. Test cards: `4242 4242 4242 4242` pays, `4000 0000 0000 0002` is declined; UPI `success@razorpay` pays, `failure@razorpay` is declined.
-- **Production** with Razorpay:
-  1. Create API keys in the Razorpay Dashboard (Settings → API Keys) and set `PAYMENT_GATEWAY=razorpay`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`.
-  2. Add a webhook (Settings → Webhooks) pointing at `https://<your API>/api/payments/webhook/razorpay` with the events `payment.captured`, `order.paid`, `payment.failed` and `refund.processed`, and set its secret as `RAZORPAY_WEBHOOK_SECRET`. The webhook confirms payments even if the student closes the browser mid-checkout.
-  3. Turn on saved cards (tokenisation) for your account if you want "Save this card".
-- **Card numbers never reach the platform.** Students pay in Razorpay Checkout; the API keeps only Razorpay's token, the network, last four digits and expiry, and refuses any request containing a card number.
-- **Refunds:** a mentor (or staff) cancelling refunds the student in full; a student cancelling is refunded only up to the cutoff before the session (24 hours by default). A booked session can be cancelled only before it starts; after that it is logged as completed or "didn't happen". Ending a mentorship cancels its upcoming sessions and refunds paid ones in full. Admin and Alumni Relations can refund any payment from **Payments**; refunding a session that hasn't happened yet also cancels it.
-- **Payouts to mentors are not automated.** Each payment records the platform fee and the mentor's share; paying mentors out automatically needs Razorpay Route (linked accounts with KYC) and TDS handling.
-- `PAYMENT_GATEWAY=off` (the production default) ignores fees, so every session is free.
+- **Development** uses a built-in test gateway (`PAYMENT_GATEWAY=test`): no money moves. Card `4242 4242 4242 4242` pays and `4000 0000 0000 0002` is declined; UPI `success@razorpay` pays and `failure@razorpay` is declined.
+- **Production with Razorpay:** set `PAYMENT_GATEWAY=razorpay`, `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`, and add a webhook to `https://<your API>/api/payments/webhook/razorpay` for `payment.captured`, `order.paid`, `payment.failed` and `refund.processed`, with its secret in `RAZORPAY_WEBHOOK_SECRET`.
+- **Card numbers never reach the platform.** Students pay in Razorpay Checkout; the API keeps only Razorpay's token, the card network, the last four digits and the expiry, and refuses any request containing a card number.
+- **Refunds:** a mentor or staff cancelling refunds in full; a student cancelling is refunded up to a cutoff before the session (24 hours by default). Ending a mentorship cancels its upcoming sessions and refunds paid ones.
+- **Mentor payouts aren't automated.** Each payment records the platform fee and the mentor's share; automatic payouts need Razorpay Route (linked accounts with KYC).
+- `PAYMENT_GATEWAY=off`, the production default, makes every session free.
 
-## Accounts & security
+## Accounts and security
 
 | Feature | How it works |
 |---|---|
-| **Password reset** | "Forgot password?" on the sign-in page emails a one-time link (30 minutes). The answer is the same whether or not the account exists, and at most 3 links are sent per hour. Resetting signs the account out on every device and sends a "password changed" notice. |
-| **Email confirmation** | New password accounts get a confirmation link (48 hours) and a banner until it's used. Sending mentorship requests and submitting alumni verification wait for it (`REQUIRE_EMAIL_VERIFICATION`, on by default). Google sign-ins count as confirmed. |
-| **Two-factor sign-in** | Settings → Security: scan a QR code with any authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…), confirm a code, save 10 one-time recovery codes. Sign-in then asks for a code after the password, and after Google too. A code can't be reused, and 5 wrong codes pause it for 15 minutes and email the user. Keys are encrypted at rest (AES-256-GCM with `DATA_ENCRYPTION_KEY`). The QR code is drawn by our own server, so the setup link never goes to a third party. |
-| **Required for staff** | With `REQUIRE_STAFF_2FA` (on by default in production), admin, Alumni Relations and Placement accounts see a setup screen until two-factor sign-in is on, and the API refuses their other requests (`403 mfa_setup_required`). |
-| **Your data** | Settings → Your data: students and alumni download everything the platform holds about them (JSON), or delete their account (password and typing DELETE). Deletion erases personal data, saved cards, verification documents and notifications, ends mentorships (upcoming sessions cancelled and refunded), and keeps records others or the law need (payments, shared messages, feedback, the audit log) under "Deleted user". Staff accounts are removed by an administrator. |
-| **Sign out everywhere** | Sessions carry a version number. Password reset or change and turning two-factor on or off bump it, which ends every other session at once. |
-| **Document storage** | Verification uploads are checked by their content (real PDF, PNG, JPEG or WEBP only, 5 MB each), then stored privately: on disk (`STORAGE_DRIVER=local`) or in an S3-compatible bucket (`STORAGE_DRIVER=s3`: AWS S3, Cloudflare R2, MinIO). The bucket stays private. Files are streamed to staff through the API, which checks the role and writes an audit entry on every view. |
-| **First admin** | Production never loads demo data. `npm run bootstrap -w apps/api -- --admin-email you@college.edu --admin-name "Your Name"` creates the settings, the expertise-tag list and the first administrator, and emails them a link to choose a password (it also prints the link). |
+| **Password reset** | A one-time emailed link (30 minutes). The answer is the same whether or not the account exists, and at most 3 links go out per hour. Resetting signs the account out everywhere. |
+| **Email confirmation** | New accounts get a confirmation link (48 hours). Sending requests and submitting alumni verification wait for it (`REQUIRE_EMAIL_VERIFICATION`). Google sign-ins count as confirmed. |
+| **Two-factor sign-in** | **Settings → Security**: scan a QR code with any authenticator app and save 10 recovery codes. Codes can't be reused, and 5 wrong codes pause it for 15 minutes. Keys are encrypted at rest (AES-256-GCM with `DATA_ENCRYPTION_KEY`), and the QR code is drawn by our own server. |
+| **Required for staff** | With `REQUIRE_STAFF_2FA` (on by default in production), admin, Alumni Relations and Placement accounts must set up two-factor sign-in before anything else. |
+| **Your data** | **Settings → Your data**: download everything the platform holds about you, or delete your account. Deletion erases personal data, saved cards, documents and notifications, and keeps records others or the law need (payments, shared messages, feedback, the audit log) under "Deleted user". |
+| **Sign out everywhere** | Resetting or changing a password, or turning two-factor sign-in on or off, ends every other session at once. |
+| **Documents** | Verification uploads are identified by their content (real PDF, PNG, JPEG or WEBP only, 5 MB each) and stored privately on disk (`STORAGE_DRIVER=local`) or in an S3-compatible bucket (`STORAGE_DRIVER=s3`). Staff view them through the API, which checks the role and logs every view. |
+| **First admin** | Production never loads demo data. `npm run bootstrap -w apps/api -- --admin-email you@college.edu --admin-name "Your Name"` creates the settings, the expertise tags and the first administrator, and emails them a link to choose a password. |
 
-Demo accounts are already email-confirmed and have two-factor sign-in off, so the demo logins in §2 work as before. In development, staff two-factor sign-in is not required unless you set `REQUIRE_STAFF_2FA=true`.
-
-## 5. Architecture
+## Architecture
 
 ```
 apps/
-  api/   Express + TypeScript + Mongoose + Socket.IO + node-cron      (port 4000)
+  api/   Express + TypeScript + Mongoose + Socket.IO                  (port 4000)
     src/
-      config/env.ts        all configuration
-      models/              16 spec entities + User, Notification, AuditLog, Settings, InstitutionRecord, …
-      serializers/         ★ PRIVACY LAYER: the only place documents become API output (allow-lists)
-      middleware/          auth (JWT cookie / Bearer), leakGuard (response privacy scan), errors
-      services/            matching, requests (throttle/expiry/accept), capacity, sessions, calendar,
-                           engagement, analytics, verification, notify, channels (email/SMS)
-      routes/              REST endpoints (see docs/API.md)
-      jobs/                cron schedule (expiry 10 min, reminders 5 min, action items hourly, decay weekly)
-      socket.ts            real-time messages + notifications (privacy-checked emits)
-      seed/                demo / UAT data
-    tests/                 vitest + supertest + in-memory MongoDB
+      config/        env.ts (all settings), validate.ts (production startup checks)
+      models/        the spec's entities plus User, Notification, AuditLog, Settings, InstitutionRecord…
+      serializers/   ★ the privacy layer: the only place documents become API output (allow-lists)
+      middleware/    auth (JWT cookie), leakGuard (scans every response for contact data), errors
+      services/      matching, requests, capacity, sessions, calendar, engagement, analytics,
+                     verification, payments, notify, channels (email/SMS), storage
+      routes/        REST endpoints (see docs/API.md)
+      jobs/          background jobs: on timers, or on demand via POST /api/jobs/:group
+      socket.ts      real-time messages and notifications (privacy-checked)
+      seed/          demo data and first-run bootstrap
+    tests/           vitest + supertest + in-memory MongoDB
   web/   Next.js 15 (App Router) + React 19 + Tailwind                (port 3000)
-    src/app/               public pages, (app)/ authenticated pages per role
-    src/components/        UI kit, app shell, mentor card
-docs/    PRIVACY.md (field-by-field statement), API.md
+    src/app/         public pages, and (app)/ for the signed-in pages of each role
+    src/components/  UI kit, app shell, landing-page pieces, session countdown
+deploy/start.mjs     runs API + website in one container (root Dockerfile)
+docs/                API.md, PRIVACY.md
 ```
 
-**Key design decisions**
-
 | Concern | Decision |
-|---------|----------|
-| Capacity under concurrency | One `MentorCapacity` document per mentor, and `findOneAndUpdate({activeCount < maxMentees, not paused}, {$inc: 1})`. MongoDB applies the filter and the increment atomically, so N simultaneous accepts can never exceed the limit (spec §8, Track J). Each later step rolls the slot back if it fails. |
-| Throttling | Student: max pending, max per rolling period, cooldown after a decline, max active mentorships. Mentor: max open requests in their inbox. All limits live in the DB and admins edit them in the UI. A post-insert re-check keeps the limits under concurrent requests. |
-| Expiry | `expiresAt` per request. A sweep every 10 minutes **plus** a check at accept time, so an expired-but-unswept request can never be accepted. Jobs take an injectable clock for tests. |
-| Privacy | `select:false` on contact fields → allow-list serializers → `leakGuard` scan of every response and socket emit → exhaustive tests. Free text is masked before storage. Calendar events carry no attendee list. |
-| Matching | Computed on demand. Weighted score over expertise overlap, target-role similarity, industry, mentoring areas, department, availability and **load balance** (spreads students across mentors). Every result carries plain-language reasons. Admins tune the weights. |
-| Messaging | Socket.IO with rooms per mentorship, plus a polling fallback in the UI if websockets are blocked. |
-| Auth | JWT in an httpOnly SameSite=Lax cookie. The web app proxies `/api` so it is same-origin. bcrypt password hashes; the auth endpoints are rate-limited. |
+|---|---|
+| **Capacity under concurrency** | One `MentorCapacity` document per mentor, incremented with `findOneAndUpdate({ activeCount < maxMentees, not paused }, { $inc })`. MongoDB applies the check and the increment atomically, so any number of simultaneous accepts can never go over the limit. |
+| **Throttling** | Students: max pending, max per rolling period, a cooldown after a decline, max active mentorships. Mentors: max open requests. All limits live in the database and admins edit them in the UI. |
+| **Expiry** | Each request has an `expiresAt`. A background sweep expires overdue requests, and accepting re-checks it, so an expired request can never be accepted. |
+| **Privacy** | `select: false` on contact fields → allow-list serializers → a `leakGuard` scan of every response and socket message → exhaustive tests. Free text is masked before it's stored. Calendar events carry no attendee list. |
+| **Matching** | Computed on demand: a weighted score over expertise overlap, target-role similarity, industry, mentoring areas, department, availability and load balance (to spread students across mentors). Every result carries plain-language reasons, and admins tune the weights. |
+| **Messaging** | Socket.IO with a room per mentorship, plus a polling fallback when WebSockets are blocked. |
+| **Auth** | A JWT in an httpOnly, SameSite=Lax cookie. The website proxies `/api` and `/socket.io`, so the browser only talks to one origin. Passwords are hashed with bcrypt and the auth endpoints are rate-limited. |
+| **Background jobs** | Six jobs (request expiry, session reminders, payment holds, action-item reminders, pause auto-resume, weekly engagement check). They run on in-process timers by default, or a host scheduler calls `POST /api/jobs/frequent | hourly | weekly`, protected by `CRON_SECRET`, on hosts that stop the app between requests. Every job is safe to run late or twice. |
 
-## 6. Feature map (spec → code)
+**Where each module lives**
 
-| Module | Where |
-|--------|-------|
-| M1 Verification & profile | `services/verification.ts`, `routes/alumni.ts`, web `mentor/profile`, `admin/verification`, `admin/records` |
-| M2 Capacity & availability | `services/capacity.ts`, `routes/mentors.ts` (`/me/capacity`, `/me/pause`, `/me/availability`), web `mentor/availability`, `admin/capacity` |
-| M3 Student career profile | `routes/students.ts`, web `student/profile` |
-| M4 Matching | `services/matching.ts`, `GET /api/mentors/search`, web `mentors` |
-| M5 Requests | `services/requests.ts`, `routes/requests.ts`, web `mentor` (inbox), `student` |
-| M6 Scheduling & sessions | `services/sessions.ts`, `services/calendar.ts`, web `mentorships/[id]` → Sessions |
-| M7 Goals, actions, feedback | `routes/mentorships.ts`, web `mentorships/[id]` → Goals / Feedback |
-| M8 Engagement | `services/engagement.ts`, weekly job, web `admin/engagement` |
-| M9 Messaging | `routes/messages.ts`, `socket.ts`, `lib/mask.ts`, web `mentorships/[id]` → Messages |
-| M10 Analytics | `services/analytics.ts`, `routes/analytics.ts`, web `analytics`, `admin/mentors` |
-| Notifications | `services/notify.ts` (in-app + socket + email + SMS), web `notifications` |
-| Admin dashboard | web `admin/*` |
-| Privacy statement | `docs/PRIVACY.md`, web `/privacy` |
+| Module | API | Website |
+|---|---|---|
+| M1 Verification & profile | `services/verification.ts`, `routes/alumni.ts` | `mentor/profile`, `admin/verification`, `admin/records` |
+| M2 Capacity & availability | `services/capacity.ts`, `routes/mentors.ts` | `mentor/availability`, `admin/capacity` |
+| M3 Student career profile | `routes/students.ts` | `student/profile` |
+| M4 Matching | `services/matching.ts`, `GET /api/mentors/search` | `mentors` |
+| M5 Requests | `services/requests.ts`, `routes/requests.ts` | `mentor` (Home), `student` |
+| M6 Scheduling & sessions | `services/sessions.ts`, `services/calendar.ts` | `mentorships/[id]` → Sessions |
+| M7 Goals, actions, feedback | `routes/mentorships.ts` | `mentorships/[id]` → Goals, Feedback |
+| M8 Engagement | `services/engagement.ts`, weekly job | `admin/engagement` |
+| M9 Messaging | `routes/messages.ts`, `socket.ts`, `lib/mask.ts` | `mentorships/[id]` → Messages |
+| M10 Analytics | `services/analytics.ts`, `routes/analytics.ts` | `analytics`, `admin/mentors` |
 
-## 7. Testing
+## Testing
 
 ```bash
 npm test
 ```
 
-The suite has 127 tests in 13 files. Each file runs against its own throw-away in-memory MongoDB. CI (`.github/workflows/ci.yml`) runs the type checks, these tests and both production builds on every push and pull request.
+132 tests in 14 files, each file against its own throw-away in-memory MongoDB. [CI](.github/workflows/ci.yml) runs the type checks, the tests and the production build on every push and pull request.
 
-| Spec requirement | Test file | What it proves |
-|------------------|-----------|----------------|
-| Alumni contact data never in any student-accessible response | `tests/privacy.test.ts` | Loads the full seed. **Enumerates every route from the Express router** and calls every route (GET and non-GET) as a student with real ids. It asserts that every path parameter was filled, every GET returns an expected status (200/403, never a 404 from a bad id), and the student data endpoints really return data. It also calls every GET as a mentor (symmetric privacy), runs full flows (request, withdraw, propose, book, complete, cancel, end), pages through matching for all 60 mentors with every facet, opens every mentor profile, and listens to Socket.IO. Every payload is searched for every alumni email, phone (by digits) and LinkedIn URL. |
-| Capacity cannot be exceeded under concurrency | `tests/capacity.test.ts` | 10 rounds of 8 simultaneous accepts (service layer), 10 parallel HTTP accepts, the same request accepted 5× at once, pause, end-then-reaccept, lowering the limit. |
-| Throttling enforced and configurable | `tests/throttle.test.ts` | Pending limit, period limit, admin-configured limits, role restriction, 8 concurrent requests, duplicate, cooldown, mentor inbox limit (also concurrent). |
-| Expiry job correct | `tests/expiry.test.ts` | Boundary at exactly `expiresAt`, only pending requests touched, idempotent, 3 concurrent sweeps, configurable expiry days, accept-after-expiry refused. |
-| Google sign-in | `tests/google.test.ts` | New account, linking an existing account, unverified email rejected, forged state/nonce rejected, wrong audience rejected, suspended accounts blocked, open-redirect-safe `next`. With two-factor on, Google alone gives no session: the redirect asks for a code, which completes with only the challenge cookie. Linking Google to an address that was registered but never confirmed removes the earlier password and ends its sessions (protects against someone pre-registering another person's email); confirmed accounts keep their password. |
-| Password reset, email confirmation, two-factor sign-in, first admin | `tests/account.test.ts` | RFC 6238 test vectors; reset links are one-time, expire and are only stored hashed; reset signs out every session; unknown emails get the same answer; confirmation gate on requests; two-factor sign-in needs a fresh code (replays refused), recovery codes work once, 5 wrong codes lock it, the challenge can't be used as a session; staff gate; bootstrap is safe to re-run and its invite link works. |
-| Document storage, upload checks, production config | `tests/storage.test.ts` | Files are identified by content (an HTML file named `.pdf` is refused); local storage refuses paths outside its folder and never overwrites; S3 writes are private with server-side encryption; staff-only streaming with `no-store`; oversized uploads give a clear 400; unsafe production settings are refused and a complete set is accepted. |
-| Paid sessions | `tests/payments.test.ts` | Free mentors book straight away; a paid slot is held, paid and confirmed; the student sees how they paid and the mentor sees only their share; a declined card keeps the hold and a retry works; only the student can pay; unpaid holds are released; refund rules (mentor cancels, student late, student early, staff refund); card numbers and CVVs are refused; the fee cap and the on/off switch; Razorpay signature checks; a full Razorpay checkout against a stand-in Razorpay (order → signature → capture → saved card), an idempotent webhook, a retry after a failed card on the same order, and money that arrives after the hold lapsed (recorded, then refunded). |
-| Download my data, delete my account | `tests/dataRights.test.ts` | The export holds the person's own records and no one else's contact details; deletion needs DELETE and the password, refuses staff, signs out everywhere, ends mentorships with refunds, withdraws or declines open requests, erases saved cards, goals and verification records, keeps payments and shared messages under "Deleted user", frees the email address, and an admin cannot reactivate the account. |
-| Audit fixes (Nov 2026) | `tests/audit.test.ts` | No booking or paying in an ended mentorship, and ending one cancels its open proposals, unpaid holds and upcoming booked sessions (refunded); a booked session can be cancelled only before it starts; a staff refund of an upcoming session cancels it; two overlapping bookings with one mentor at the same moment, and a double click on one slot, book once; two mentors accepting the same student at once stay within the student limit; suspended mentors are hidden and cannot be requested; an admin cannot suspend or demote themselves or the last admin, and students and alumni keep their role; bad paging values are a 400; goals and action items only point at their own mentorship and student; one feedback per session per person. |
-| Matching, verification, engagement, sessions, analytics | `tests/domain.test.ts` | Ranking + reasons + capacity filter, weight changes, record matching + audit trail, decay → nudge → cooldown → recovery, propose/book/ICS/complete, mentor double-booking prevented, private notes hidden, role access. |
+| What's proved | File | How |
+|---|---|---|
+| Alumni contact data never reaches a student | `privacy.test.ts` | Loads the full demo data, **lists every route from the Express router**, and calls each one as a student with real ids. It also runs whole flows (request, withdraw, propose, book, complete, cancel, end), pages through matching for all 60 mentors, opens every profile and listens to Socket.IO, searching every payload for every alumni email, phone number and LinkedIn URL. A new route without coverage fails the test. |
+| Capacity can't be exceeded under concurrency | `capacity.test.ts` | Rounds of simultaneous accepts, parallel HTTP accepts, one request accepted five times at once, pause, end-then-reaccept, lowering the limit. |
+| Throttling is enforced and configurable | `throttle.test.ts` | Pending and period limits, admin-set limits, concurrent requests, duplicates, cooldown, the mentor inbox limit. |
+| Expiry is correct | `expiry.test.ts` | The exact `expiresAt` boundary, only pending requests touched, idempotent and concurrent sweeps, accept-after-expiry refused. |
+| Background jobs on demand | `jobs.test.ts` | The job address is off without `CRON_SECRET`, refuses a missing or wrong key even with the scheduler's header, and runs the right jobs with the right key. |
+| Google sign-in | `google.test.ts` | New accounts, linking, unverified email, forged state or nonce, wrong audience, suspended accounts, open-redirect safety, two-factor after Google. |
+| Password reset, email confirmation, two-factor, first admin | `account.test.ts` | RFC 6238 vectors, one-time and hashed reset links, sign-out everywhere, replay and lockout, the staff gate, a re-runnable bootstrap. |
+| Documents and production settings | `storage.test.ts` | Content-based file checks, private storage, staff-only streaming, unsafe production settings refused, the hosted-demo rules. |
+| Paid sessions | `payments.test.ts` | Holds, payment, refunds, card numbers refused, the fee cap, Razorpay signatures and webhooks against a stand-in Razorpay. |
+| Download my data, delete my account | `dataRights.test.ts` | Exports hold only your own records; deletion erases what it should and keeps what others or the law need. |
+| A mentor's own Meet room | `meetLink.test.ts` | Link shapes normalised, non-Meet links refused, private to the mentor, used for new sessions and applied to upcoming ones. |
+| Next meeting | `sessionPass.test.ts` | Each participant gets their soonest meeting and its link; staff never get meeting links. |
+| Matching, verification, engagement, sessions, analytics, audit fixes | `domain.test.ts`, `audit.test.ts` | Ranking and reasons, record matching with an audit trail, engagement nudges, booking rules, double-booking prevention, role access. |
 
-## 8. Deployment
+## Deployment
 
-### Docker Compose (MongoDB + API + worker + web)
+### Antideploy (the live demo)
+
+The demo at https://mentorbridge.antideploy.app runs on [Antideploy](https://antideploy.com). The app id is in [`.antideploy.json`](.antideploy.json), and [`AGENTS.md`](AGENTS.md) tells AI agents how to deploy updates.
+
+- **One container.** The root [`Dockerfile`](Dockerfile) builds both apps, and [`deploy/start.mjs`](deploy/start.mjs) runs the API inside the container (port 4400) and the website on the platform's `PORT`. The website proxies `/api` and `/socket.io` to the API, so cookies stay first-party.
+- **Hosted-demo mode.** The image sets `HOSTED_DEMO=true` (email is written to a log, not sent, because the demo accounts use made-up addresses), `PAYMENT_GATEWAY=off`, the demo sign-in panel, and no staff two-factor requirement.
+- **Database:** MongoDB Atlas, through the app's private `MONGODB_URI` setting. Atlas **Network Access** must allow the host (`0.0.0.0/0`), because the host's IP addresses aren't fixed.
+- **Documents:** Antideploy's private S3-compatible bucket. `deploy/start.mjs` maps the platform's `AWS_*` and `S3_*` variables onto the API's own.
+- **Private settings on the app:** `MONGODB_URI`, `DATA_ENCRYPTION_KEY`, `WEB_ORIGIN`, `PUBLIC_API_URL`, `CRON_SECRET`. Antideploy generates `JWT_SECRET` itself.
+- **Background jobs.** Antideploy stops the app between requests, so in-process timers are off (`JOBS_IN_PROCESS=false`). Three Antideploy scheduled jobs call `POST /api/jobs/frequent` every 10 minutes, `/hourly` at :15 past each hour and `/weekly` on Mondays at 06:00 UTC, each with the `CRON_SECRET` key.
+- **Updating it:** Antideploy deploys what's uploaded to it, not what's on GitHub. Ask an agent to deploy (it follows `AGENTS.md`), or upload the project yourself as described at https://antideploy.com/agent.md. Never include `.env` files in the upload.
+
+### Docker Compose (database + API + worker + website)
 
 ```bash
 docker compose up --build
 ```
 
-This is a production setup: put the values it asks for (`JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `WEB_ORIGIN`, `PUBLIC_API_URL`, `SMTP_URL`, `MAIL_FROM`) in an `.env` next to `docker-compose.yml`, and serve it behind HTTPS. For a local trial use `npm run dev` instead. The worker container runs the background jobs, and the API runs with `JOBS_IN_PROCESS=false`. Then create the first admin: `docker compose exec api node apps/api/dist/seed/bootstrap.js --admin-email you@college.edu`.
+A production setup for your own server. Put the values it asks for (`JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `WEB_ORIGIN`, `PUBLIC_API_URL`, `SMTP_URL`, `MAIL_FROM`) in a `.env` next to `docker-compose.yml`, and serve it behind HTTPS. The worker container runs the background jobs. Then create the first admin: `docker compose exec api node apps/api/dist/seed/bootstrap.js --admin-email you@college.edu`.
 
-### Manual / PaaS
+### Any other host
 
-- **API:** run `npm run build -w apps/api`, then `node apps/api/dist/index.js`. It needs `MONGODB_URI`, `JWT_SECRET`, `WEB_ORIGIN`, `PUBLIC_API_URL` and `COOKIE_SECURE=true`.
-- **Worker:** run `node apps/api/dist/worker.js` as a single instance with the same env, and set `JOBS_IN_PROCESS=false` on the API.
-- **Web:** run `npm run build -w apps/web`, then `npm run start -w apps/web`, with `API_URL` (server-side proxy target) and `NEXT_PUBLIC_SOCKET_URL`.
-- **Scaling Socket.IO** across several API instances needs the Socket.IO Redis adapter (spec §16: "messaging server separate if Socket.IO is used at scale"). A single API instance needs nothing extra.
-- Put the API and web behind one domain with HTTPS (e.g. `app.example.edu` → web, `/api` and `/socket.io` → API) so cookies stay first-party.
+- **API:** `npm run build -w apps/api`, then `node apps/api/dist/index.js`.
+- **Worker:** `node apps/api/dist/worker.js` as a single instance with the same settings, and `JOBS_IN_PROCESS=false` on the API. On hosts that stop idle apps, use a scheduler and `POST /api/jobs/:group` with `CRON_SECRET` instead.
+- **Website:** `npm run build -w apps/web`, then `npm run start -w apps/web`. `API_URL` (where the website proxies `/api`) and `NEXT_PUBLIC_SOCKET_URL` are baked in at **build** time; `NEXT_PUBLIC_SOCKET_URL=same-origin` sends live chat through the website's own proxy.
+- Put the API and website behind one HTTPS domain so cookies stay first-party.
 
-### Go-live checklist
+### Before real users
 
-1. **Database:** a MongoDB Atlas cluster (the Mumbai region suits Indian institutions) with backups on. Set `MONGODB_URI`.
-2. **Secrets:** `JWT_SECRET` (`openssl rand -base64 48`) and `DATA_ENCRYPTION_KEY` (`openssl rand -base64 32`), kept in your host's secret manager. Losing `DATA_ENCRYPTION_KEY` means everyone has to set up two-factor sign-in again.
-3. **Email:** a transactional provider (Amazon SES, Postmark, Resend…) with SPF, DKIM and DMARC records on your domain. Set `SMTP_URL` and `MAIL_FROM`.
-4. **Documents:** a **private** bucket (Cloudflare R2 or AWS S3, public access blocked) and a key limited to that bucket. Set `STORAGE_DRIVER=s3` and the `S3_*` values.
-5. **Hosting:** the API on a server that stays running (Render, Railway, Fly.io, AWS…), because Socket.IO and the scheduled jobs need it, plus the web app (Vercel or the same host). HTTPS on one domain, with `COOKIE_SECURE=true`.
-6. **Start it:** the API checks its settings and lists anything missing. Run the bootstrap command to create the first admin, sign in, turn on two-factor sign-in, and import the alumni register (Admin → Records).
-7. **Payments (if mentors charge):** Razorpay live keys and the webhook (section 4.7). The API refuses to start with the test gateway in production.
-8. **Staging first:** run a separate copy (its own database and bucket) to try changes before they reach real users.
+The demo is not a production deployment. For real students and alumni:
 
+1. **Database:** a separate Atlas database (or cluster) with backups on, never the demo database.
+2. **Secrets:** `JWT_SECRET` (`openssl rand -base64 48`) and `DATA_ENCRYPTION_KEY` (`openssl rand -base64 32`). Losing `DATA_ENCRYPTION_KEY` means everyone has to set up two-factor sign-in again.
+3. **Email:** a transactional provider with SPF, DKIM and DMARC on your domain (`SMTP_URL`, `MAIL_FROM`), and `HOSTED_DEMO` off.
+4. **Documents:** a private bucket (`STORAGE_DRIVER=s3`).
+5. **Privacy notice:** the website doesn't currently include a privacy page. India's DPDP Act 2023 requires telling people what's collected and why; [`docs/PRIVACY.md`](docs/PRIVACY.md) is a starting point.
+6. **Start it:** run the bootstrap command to create the first admin, sign in, turn on two-factor sign-in, and import the alumni register.
+7. **Payments:** Razorpay live keys and the webhook, if mentors charge.
+8. **Staging first:** a separate copy with its own database and bucket.
 
-## UI design system & credits
+## Design
 
-**Direction: quiet and minimal, in the spirit of Apple's own sites.** Neutral greys carry the page, one accent (Apple's system blue) marks what you can act on, and green means success (accepted, paid, verified, open capacity). Big, tightly tracked headlines, generous space, soft white cards on a light grey canvas, pill-shaped buttons and Apple-style segmented controls. Motion is used where it explains a change of state, and every animation respects the OS "reduce motion" setting.
+**Quiet and minimal.** Neutral greys carry the page, and one accent, **Mentor Bridge orange** (the logo's `#F97316`), marks what you can act on; buttons and small text use a deeper shade (`#cf4a06`) so they pass WCAG AA contrast. Green means success. Headings fade from orange to rose. Every screen has light and dark themes, chosen in **Settings → Appearance** or with the sun/moon toggle, and applied before the first paint so there's no flash.
 
-**Type.** San Francisco where the device has it, Inter everywhere else (`tailwind.config.ts`). SF Pro itself is not served as a web font: Apple's licence limits it to Apple platforms. So Mac, iPhone and iPad visitors see SF Pro, and Windows and Android visitors see Inter, which is close.
+**Colour tokens** live in [`tailwind.config.ts`](apps/web/tailwind.config.ts) (`brand` for the accent, `ok` for success) and [`globals.css`](apps/web/src/app/globals.css) (the `ink` greys, which flip between themes). Changing `brand` re-colours every link, button and highlight.
 
-**Colour.** All colours are tokens. The neutral `ink` scale (Apple greys) flips between themes in `apps/web/src/app/globals.css`, so `text-ink-900` is always primary text. The accent is the `brand` scale and success is `ok`, both in `tailwind.config.ts`: change `brand` to re-colour every link, button and selection. `globals.css` also defines `--color-card`, `--color-primary` and friends, which the components in `components/ui/` read.
+**Type.** San Francisco on Apple devices, Inter everywhere else.
 
-**Light and dark themes.** Every screen has both. The sun/moon toggle sits in the public navbar and at the foot of the app sidebar; ⌘K has "Switch theme"; Settings → Appearance offers Light, Dark or System (the default). The choice is applied by a tiny script in `<head>` before the first paint (`apps/web/src/lib/headScripts.ts`), so there is no flash of the wrong theme.
+**Logo.** A bridge arc over three pillars on an orange tile ([`Logo.tsx`](apps/web/src/components/Logo.tsx)), with the favicon and share image to match.
 
-**Navigation, one place for each thing.**
-- Public pages (landing, sign-in pages, privacy statement, demo, 404) share one navbar (`components/SiteHeader.tsx`). Its links use the gooey pill nav, which follows the landing section in view; phones get the same links in a drop-down. Signed-in visitors see a Dashboard button instead of Sign in / Get started.
-- Public pages share one layout (`app/(public)/layout.tsx`), so the navbar stays mounted between pages and the gooey pill animates from one page's item to the next. A click moves the pill straight to its item.
-- Inside the app, everything is in the sidebar (`components/Shell.tsx`): search (⌘K / Ctrl+K), the role's sections, Notifications with its unread count, and the account menu (Settings, privacy statement, appearance, sign out). On desktop it is docked and collapses to an icon rail (remembered per browser); on phones the same sidebar slides in from the menu button. All links come from `lib/nav.ts`.
-- **Profiles** are LinkedIn-style (`components/Profile.tsx`): a cover, an overlapping avatar, name, headline and place, then About, Experience, Education, Skills and Mentoring. Students see mentors this way; both "your profile" pages preview exactly what others see. Contact details never appear.
-- **Public pages** also include Terms (`/terms`), Cancellations & refunds (`/refunds`) and Contact (`/contact`), plus `robots.txt`, `sitemap.xml`, a social-sharing image and error pages. Contact details and the legal name come from `NEXT_PUBLIC_*` settings in `apps/web/.env.example`.
+**Landing page.** Lenis smooth scrolling drives GSAP ScrollTrigger; headings rise in with GSAP SplitText; the hero sits on a React Bits **ShapeGrid** whose cells glow orange under the cursor; a scroll-speed text marquee, scroll-revealed statement, a story section where the product visual stays pinned beside four chapters, count-up figures and spotlight cards follow. Buttons stay still, and everything is still and fully readable when the device asks for reduced motion.
 
-**First-visit intro.** The first time a browser opens the site, the logo forms in liquid glass and the page fades in (`components/IntroSplash.tsx`). It is shown once per browser (`amn.intro` in local storage), skipped under "reduce motion", ends on click, Escape or Skip, and can never run longer than six seconds. To see it again, clear that key.
+**In the app**
+- **Student Home:** the next session's countdown (or, with none booked, the single most useful next step), mentorships and requests side by side, and top matches in a row.
+- **Mentor Home:** a keyboard inbox (↑↓ to browse, **A** to accept, **D** to decline).
+- **Session countdown:** days, hours, minutes and seconds to the next session, with Join switching on ten minutes before, Add to calendar, and a live state while it's on.
+- **Profiles** are LinkedIn-style; both "your profile" pages preview exactly what others see, without contact details.
+- **Alumni verification** is a four-step wizard; **Settings → Your data** is a glass folder you download parts of.
+- **Navigation:** one public navbar (a gooey pill that follows the section in view) and one app sidebar with ⌘K search; all links come from [`lib/nav.ts`](apps/web/src/lib/nav.ts).
 
-**Other UX**
-- **Student home** built around one adaptive "next best step", with a profile-strength ring.
-- **Session countdown** (`components/SessionCountdown.tsx`): when a student and mentor have a confirmed meeting, both see a live countdown (days, hours, minutes, seconds) on their home page and on the mentorship's Sessions tab, with Add to calendar. **Join** switches on ten minutes before the start and opens the call in a new tab; while it's on, the card shows "Live now" and how much time is left. The API sends each participant their mentorship's `nextMeeting`; staff never get meeting links (`tests/sessionPass.test.ts`).
-- **Mentor's own Google Meet room** (`lib/meet.ts`): a mentor can paste a Meet link (`meet.google.com/abc-defg-hij`) under **Profile → Video calls**. Sessions they confirm then use it instead of a generated Jitsi room, and saving it updates their upcoming sessions; clearing it gives those sessions fresh Jitsi rooms. Only standard Meet room codes are accepted, and the link is private: students only receive it as the video link of their own confirmed sessions (`tests/meetLink.test.ts`).
-- **Onboarding** (`components/Onboarding.tsx`): a short full-screen setup for new students (welcome, how it works, what they're aiming for) and new alumni (welcome, verification, how they'd like to help). Answers are saved to the profile. It shows once per account on any device: sign-up sets `onboardingPending`, and finishing or skipping clears it for good. Older, seeded and staff accounts never see it (`tests/onboarding.test.ts`).
-- **Your data** (Settings): the data export as a glass folder with four parts; open it and pick a part to download just that, or download everything.
-- **Mentor inbox** as a keyboard master–detail view: ↑↓ to browse, **A** to accept, **D** to decline.
-- **Alumni verification** as a 4-step wizard (Identity → Programme → Document → Review).
-- **Discovery:** a sticky search bar, filter chips, a capacity toggle, skeleton loading, and cards that size to the space available.
+**Credits.** Components adapted from [React Bits](https://reactbits.dev) (MIT + Commons Clause, licence in `components/reactbits/`) and [21st.dev](https://21st.dev): ShapeGrid (landing hero), GooeyNav (navbar), AnimatedList (mentor inbox), Stepper (verification wizard), ClickSpark (accept confirmation), glass folder cards (Your data); the landing page's marquee, scroll reveal and spotlight cards are adapted from React Bits too. Smooth scrolling by [Lenis](https://github.com/darkroomengineering/lenis), animation by [GSAP](https://gsap.com) and [Framer Motion](https://motion.dev), icons by [Lucide](https://lucide.dev).
 
-**Brand mark.** The "network A" (`apps/web/src/components/Logo.tsx`). Its apex is a mentor node set apart by a small gap, and its crossbar is an arc. It comes as a monochrome tile (`<LogoMark />`: graphite in light mode, white in dark mode), a single-colour glyph (`variant="glyph"`), a lockup with the wordmark (`<Logo />`) and standalone SVG markup for the glass reveal (`MARK_SVG`). The favicon (`apps/web/src/app/icon.svg`) follows the device's light/dark setting.
+## Scripts
 
-**Components from React Bits and 21st.dev** live in `apps/web/src/components/ui/` (the shadcn convention; the app's own UI kit is `components/ui/index.tsx`, so `@/components/ui` imports keep working). They were typed for this codebase and use the project's Framer Motion and Lucide icons.
-
-| Component | Source | Where it's used |
-|---|---|---|
-| `gooey-nav.tsx` | React Bits (MIT) | Public navbar |
-| `liquid-glass-expandable-sidebar.tsx` | 21st.dev, Troy Lorents / Automate Flows (MIT) | Not currently used (the app now uses a flat docked sidebar) |
-| `glass-folder-cards.tsx` | 21st.dev | Settings → Your data |
-
-Older React Bits pieces in `components/reactbits/` (MIT + Commons Clause, licence in that folder) are still used: AnimatedList (mentor inbox), Stepper (verification wizard) and ClickSpark (accept confirmation).
-
-## 9. Scripts
+Run these from the repository root.
 
 | Command | What it does |
-|---------|--------------|
-| `npm run dev` | API (with embedded DB + jobs) and web, with hot reload |
+|---|---|
+| `npm run dev` | API and website with hot reload (embedded database and timers locally) |
 | `npm run dev:api` / `npm run dev:web` | One side only |
-| `npm run seed` | **Resets** the database and loads demo data (development only) |
-| `npm run bootstrap -w apps/api -- --admin-email …` | First-run setup for a real database: settings, tags, first admin (sends an invite link) |
+| `npm run seed` | **Wipes** the database `MONGODB_URI` points at (or the embedded one) and loads the demo data. Development only. |
+| `npm run bootstrap -w apps/api -- --admin-email …` | First-run setup for a real database: settings, tags and the first admin |
 | `npm test` | API test suite |
-| `npm run typecheck` | TypeScript, both apps |
-| `npm run build` | Production builds |
+| `npm run typecheck` | TypeScript checks for both apps |
+| `npm run build` | Production builds of both apps |
 
-## 10. Known limitations / not yet verified
+## Known limitations
 
-Stated plainly so nothing is assumed to work that hasn't been exercised:
+Stated plainly, so nothing is assumed to work that hasn't been exercised.
 
-- **Google Calendar, Outlook, Twilio and SMTP** are implemented (OAuth code flow, token refresh, event create/delete, SMS and email send) but were **not tested against the live services**, because no credentials were available. The local fallbacks (.ics, Jitsi, outbox files) are tested and work.
-- **Google sign-in** is implemented and covered by tests with Google's endpoints mocked, but was **not tried against real Google** (no OAuth client was available).
-- **Institution SSO** (SAML or another identity provider beyond Google) and **LinkedIn profile prefill** — both listed as optional in spec §12 — are **not implemented**. Login is email + password.
-- **ERP integration** is CSV import plus an import endpoint. There is no live connector to a specific ERP product.
-- **AI/ML extensions** (embedding-based semantic matching, lapse prediction) are not implemented. The matching engine's interface is designed so a semantic score can be added as another weighted component.
-- Socket.IO runs on a single API instance. Horizontal scaling needs the Redis adapter.
-- **Docker:** `docker-compose.yml` and both Dockerfiles were written but **not built or run** (Docker Desktop was not running on the development machine). Note that the web image bakes `API_URL` (rewrite target) and `NEXT_PUBLIC_SOCKET_URL` in at **build** time, so pass them as build args when they differ from the defaults.
-- Reminder times in notifications are formatted in UTC. The web UI shows local times.
-- **Two-factor lockout:** someone who loses both their phone and their recovery codes cannot get back in by themselves, and there is no admin "reset two-factor" button yet. Until there is, an operator can switch it off in the database (`mfaEnabled: false` on the user, and remove the `mfa*` fields).
-- **Razorpay** is covered by tests against a stand-in Razorpay (orders, signature checks, capture, saved-card tokens, refunds, webhooks), but was **not tried against the real Razorpay API** (no keys were available). The test gateway is exercised end to end in the browser.
-- **S3 / R2 storage** is covered by tests with a stand-in client, but was **not tried against a real bucket** (no credentials were available). The local disk driver is tested end to end.
-- **CI workflow** (`.github/workflows/ci.yml`) runs the same commands that pass locally, but it has **not run on GitHub yet**: the project has no GitHub repository so far.
-- **Staging deployment and a hosted database** need your accounts (hosting, MongoDB Atlas, email provider, bucket), so they are documented in the go-live checklist but not set up.
+- **Not tried against the real services** (no credentials were available): Google Calendar, Outlook, Twilio, SMTP sending, Google sign-in and Razorpay. They're implemented and covered by tests with those services stood in, and the local fallbacks (.ics, Jitsi, outbox files, the test gateway) are tested end to end.
+- **Tried for real:** MongoDB Atlas, an S3-compatible bucket (Antideploy's), the root Dockerfile (built and running on Antideploy), and scheduled jobs through `POST /api/jobs/:group`. `docker-compose.yml` has not been built.
+- **Not implemented:** institution SSO beyond Google, LinkedIn profile prefill, a live connector to a specific ERP (there's CSV import and an import endpoint), and AI extensions such as semantic matching.
+- **No privacy page on the website** (see [Before real users](#before-real-users)).
+- **Scaling:** Socket.IO runs on one API instance; more need the Socket.IO Redis adapter.
+- **Times in notifications** are formatted in UTC; the website shows local times.
+- **Two-factor lockout:** someone who loses both their phone and their recovery codes can't get back in alone, and there's no admin "reset two-factor" button yet. An operator can switch it off in the database (`mfaEnabled: false`, and remove the `mfa*` fields).

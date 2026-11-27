@@ -11,9 +11,15 @@ const nextConfig = {
   poweredByHeader: false,
   // Dev-only 'N' badge: bottom-left would sit on the sidebar's account row and controls.
   devIndicators: { position: 'bottom-right' },
-  // Same-origin API: the browser talks to /api on the web origin, Next proxies to the API server.
+  // Socket.IO asks for /socket.io/?… with a trailing slash; don't redirect it away.
+  skipTrailingSlashRedirect: true,
+  // Same-origin API: the browser talks to /api (and /socket.io) on the web origin, Next proxies to the API server.
   async rewrites() {
-    return [{ source: '/api/:path*', destination: `${API}/api/:path*` }];
+    return [
+      { source: '/api/:path*', destination: `${API}/api/:path*` },
+      { source: '/socket.io/', destination: `${API}/socket.io/` },
+      { source: '/socket.io/:path*', destination: `${API}/socket.io/:path*` },
+    ];
   },
   async headers() {
     return [
