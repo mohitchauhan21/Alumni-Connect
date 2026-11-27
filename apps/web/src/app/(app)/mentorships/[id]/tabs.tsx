@@ -169,20 +169,56 @@ export function SessionsTab({ id, role, active, mentorFee = 0, otherName = 'the 
   const past = sessions.filter((s) => !['proposed', 'awaiting_payment', 'scheduled'].includes(s.status));
   // The next confirmed meeting that hasn't ended, shown as a live countdown with Join.
   const meeting = role === 'staff' ? undefined : sessions.filter((s) => s.status === 'scheduled' && s.scheduledStart && new Date(s.scheduledEnd ?? s.scheduledStart).getTime() > Date.now()).sort((a, b) => +new Date(a.scheduledStart!) - +new Date(b.scheduledStart!))[0];
+  // The countdown already shows that session, so the list below only holds the others.
+  const others = meeting ? upcoming.filter((s) => s.id !== meeting.id) : upcoming;
+  const meetingBegun = !!meeting?.scheduledStart && new Date(meeting.scheduledStart).getTime() <= Date.now();
+  const meetingStarted = !!meeting?.scheduledStart && new Date(meeting.scheduledStart).getTime() < Date.now() + 15 * 60000;
 
   return (
     <div className="space-y-6">
       {meeting && (
         <section aria-label="Your next session">
-          <SessionCountdown meeting={{ id: meeting.id, title: meeting.title ?? null, scheduledStart: meeting.scheduledStart ?? null, scheduledEnd: meeting.scheduledEnd ?? null, videoLink: meeting.videoLink ?? null }} withName={otherName} mentorshipId={id} />
+          <SessionCountdown
+            meeting={{ id: meeting.id, title: meeting.title ?? null, scheduledStart: meeting.scheduledStart ?? null, scheduledEnd: meeting.scheduledEnd ?? null, videoLink: meeting.videoLink ?? null }}
+            withName={otherName}
+            mentorshipId={id}
+            showDetails={false}
+            extra={
+              <>
+                {meeting.calendarSynced && <Badge tone="green">In your calendar</Badge>}
+                {meeting.paid &&
+                  (role === 'student' && meeting.paymentId ? (
+                    <Link href={`/payments/${meeting.paymentId}`} className="inline-flex items-center gap-1 self-center px-2 text-[13px] font-medium text-brand-700 hover:underline">
+                      <Receipt size={13} /> Paid {inr(meeting.fee)}
+                    </Link>
+                  ) : (
+                    <Badge tone="green">Paid {inr(meeting.fee)}</Badge>
+                  ))}
+                {meetingStarted && (
+                  <button className="btn-secondary px-4 py-2.5 text-[14px]" onClick={() => setLogging(meeting)}>
+                    Log session
+                  </button>
+                )}
+                {!meetingBegun && (
+                  <button className="btn-ghost px-4 py-2.5 text-[14px] text-ink-500" onClick={() => cancel(meeting)}>
+                    Cancel
+                  </button>
+                )}
+              </>
+            }
+          />
         </section>
       )}
-      <Card title="Upcoming" actions={active && role !== 'staff' && <button className="btn-primary text-xs" onClick={() => setProposing(true)}>Propose times</button>}>
-        {upcoming.length === 0 ? (
-          <EmptyState title="No upcoming sessions" body="Propose two or three times that suit you — the other person picks one." />
+      <Card title={meeting ? 'Other upcoming sessions' : 'Upcoming'} actions={active && role !== 'staff' && <button className="btn-primary text-xs" onClick={() => setProposing(true)}>Propose times</button>}>
+        {others.length === 0 ? (
+          meeting ? (
+            <p className="muted">Nothing else booked yet. Propose times for your next session whenever you’re ready.</p>
+          ) : (
+            <EmptyState title="No upcoming sessions" body="Propose two or three times that suit you — the other person picks one." />
+          )
         ) : (
           <ul className="space-y-4">
-            {upcoming.map((s) => {
+            {others.map((s) => {
               const mine = s.proposedBy === me?.user.id;
               const started = s.scheduledStart && new Date(s.scheduledStart).getTime() < Date.now() + 15 * 60000;
               // Once a booked session's time has come it can't be cancelled, only logged.

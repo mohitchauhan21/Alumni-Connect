@@ -155,7 +155,7 @@ function Dashboard() {
     <>
       <PageHeader
         icon={Inbox}
-        eyebrow="Mentor inbox"
+        eyebrow="Home"
         title={pending.length ? `${pending.length} request${pending.length === 1 ? '' : 's'} waiting` : 'You’re all caught up'}
         subtitle="Accept what you can, decline the rest — no explanation needed. Unanswered requests expire on their own."
         actions={

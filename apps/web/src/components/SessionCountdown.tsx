@@ -31,7 +31,23 @@ function parts(ms: number) {
  *
  * `preview` renders the same card with inert buttons, for the landing page.
  */
-export function SessionCountdown({ meeting, withName, mentorshipId, preview = false }: { meeting: Meeting; withName: string; mentorshipId?: string; preview?: boolean }) {
+export function SessionCountdown({
+  meeting,
+  withName,
+  mentorshipId,
+  preview = false,
+  showDetails = true,
+  extra,
+}: {
+  meeting: Meeting;
+  withName: string;
+  mentorshipId?: string;
+  preview?: boolean;
+  /** Off on the session page itself, where "Details" would link to where you already are. */
+  showDetails?: boolean;
+  /** Extra actions for this session (paid badge, log, cancel…) shown after the built-in ones. */
+  extra?: React.ReactNode;
+}) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 1000);
@@ -129,11 +145,14 @@ export function SessionCountdown({ meeting, withName, mentorshipId, preview = fa
             <a href={`/api/mentorships/${mentorshipId}/sessions/${meeting.id}/ics`} className="btn-ghost px-4 py-2.5 text-[14px]">
               <CalendarPlus size={15} /> Add to calendar
             </a>
-            <Link href={sessionPage} className="btn-ghost px-4 py-2.5 text-[14px]">
-              Details
-            </Link>
+            {showDetails && (
+              <Link href={sessionPage} className="btn-ghost px-4 py-2.5 text-[14px]">
+                Details
+              </Link>
+            )}
           </>
         )}
+        {extra}
         {preview && (
           <span className="btn-ghost pointer-events-none px-4 py-2.5 text-[14px]">
             <CalendarPlus size={15} /> Add to calendar

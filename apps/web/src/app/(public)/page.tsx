@@ -3,14 +3,13 @@ import { useGSAP } from '@gsap/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Building2, Check, ChevronDown, ChevronRight, Clock, Download, EyeOff, GraduationCap, KeyRound, Lock, ShieldCheck, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, Building2, Check, ChevronDown, Clock, Download, EyeOff, GraduationCap, KeyRound, Lock, ShieldCheck, Sparkles, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { LogoMark } from '@/components/Logo';
-import { Magnet, SpotlightCard, VelocityMarquee } from '@/components/landing/interactive';
+import { SpotlightCard, VelocityMarquee } from '@/components/landing/interactive';
 import { SmoothScroll } from '@/components/landing/SmoothScroll';
 import { ScrollRevealText, SplitReveal } from '@/components/landing/text';
-import { VantaNet } from '@/components/landing/VantaNet';
 import { CapacityVisual, MatchVisual, ProductPreview, ReportVisual } from '@/components/landing/visuals';
 import { CountUp, Reveal } from '@/components/motion';
 import { SessionCountdown } from '@/components/SessionCountdown';
@@ -22,9 +21,9 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 /* Static marketing copy only — the public page never calls a data endpoint. Product visuals are
    illustrative (labelled as such) and every claim is a property of how the platform works.
 
-   Motion: Lenis smooth scroll drives GSAP ScrollTrigger; the hero sits on a live Vanta NET; headings
-   rise in with GSAP SplitText; React Bits–style marquee, scroll-reveal text, spotlight cards and
-   magnetic buttons. Everything falls back to still, fully readable content under reduced motion. */
+   Motion: Lenis smooth scroll drives GSAP ScrollTrigger; headings rise in with GSAP SplitText;
+   React Bits–style marquee, scroll-reveal text and spotlight cards. Buttons stay still. Everything
+   falls back to still, fully readable content under reduced motion. */
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const NO_REDUCE = '(prefers-reduced-motion: no-preference)';
@@ -119,20 +118,12 @@ export default function Landing() {
 
       {/* ───────────────────────────── hero */}
       <section className="hero relative isolate overflow-hidden">
-        <VantaNet className="absolute inset-0 -z-20" />
-        {/* a soft pool of page colour behind the words keeps them readable over the net */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(ellipse_62%_48%_at_50%_46%,rgb(var(--canvas)/0.88),rgb(var(--canvas)/0.35)_60%,transparent_80%)]" />
+        {/* a still, soft wash of the accent behind the headline */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_55%_at_50%_30%,rgba(207,74,6,0.08),transparent_70%)] dark:bg-[radial-gradient(70%_55%_at_50%_30%,rgba(251,146,60,0.14),transparent_70%)]" />
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-48 bg-gradient-to-b from-transparent to-canvas" />
 
         <div className="hero-content mx-auto flex min-h-[calc(100svh-56px)] max-w-6xl flex-col items-center justify-center px-5 pb-24 pt-16 text-center sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 0.8, ease: EASE }}>
-            <Link href="/#product" className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-strong)] bg-surface/70 py-1 pl-1 pr-3 text-[13px] text-ink-600 backdrop-blur-xl transition hover:border-brand-600/40">
-              <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[11px] font-semibold text-white">New</span>
-              Mentorship, verified by your institution <ChevronRight size={14} className="text-ink-400" />
-            </Link>
-          </motion.div>
-
-          <h1 className="mx-auto mt-8 max-w-5xl text-[46px] font-semibold leading-[1.02] tracking-[-0.05em] sm:text-[84px]">
+          <h1 className="mx-auto max-w-5xl text-[46px] font-semibold leading-[1.02] tracking-[-0.05em] sm:text-[84px]">
             <SplitReveal as="span" trigger="load" delay={0.15} text="Mentoring that respects" className="block" />
             <SplitReveal as="span" by="words" trigger="load" delay={0.6} text="everyone’s time." className="block" wordClassName="text-gradient" />
           </h1>
@@ -147,16 +138,12 @@ export default function Landing() {
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 1.1, ease: EASE }} className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Magnet>
               <Link href="/register?role=student" className="btn-primary px-7 py-3.5 text-[15px] shadow-glow">
                 Get started — it’s free <ArrowRight size={16} />
               </Link>
-            </Magnet>
-            <Magnet>
               <Link href="/contact" className="btn-secondary px-7 py-3.5 text-[15px] backdrop-blur-xl">
                 For institutions
               </Link>
-            </Magnet>
           </motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.3 }} className="mt-5 text-[13px] text-ink-400">
             Alumni? <Link href="/register?role=alumnus" className="link">Become a mentor</Link>
@@ -336,16 +323,12 @@ export default function Landing() {
               <SplitReveal as="h2" text="Give an hour. Change a career." className="mx-auto mt-9 max-w-4xl text-[40px] font-semibold leading-[1.04] tracking-[-0.045em] sm:text-[68px]" />
               <p className="mx-auto mt-5 max-w-xl text-[18px] text-[#a1a1a6]">Join as a student to find guidance, or as an alumnus to give back — on your terms.</p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-                <Magnet>
                   <Link href="/register" className="btn bg-white px-7 py-3.5 text-[15px] text-[#1d1d1f] hover:bg-white/90">
                     Create your account <ArrowRight size={16} />
                   </Link>
-                </Magnet>
-                <Magnet>
                   <Link href="/contact" className="btn border border-white/20 px-7 py-3.5 text-[15px] text-white/85 hover:border-white/40 hover:text-white">
                     Talk to us
                   </Link>
-                </Magnet>
               </div>
             </div>
           </div>

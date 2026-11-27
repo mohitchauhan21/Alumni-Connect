@@ -8,10 +8,8 @@ import {
   Database,
   Gauge,
   HeartPulse,
-  Inbox,
   IndianRupee,
   LayoutDashboard,
-  Lock,
   ScrollText,
   Settings2,
   ShieldCheck,
@@ -49,7 +47,7 @@ export const NAV: Record<Role, NavGroup[]> = {
   alumnus: [
     {
       items: [
-        { href: '/mentor', label: 'Requests', icon: Inbox, keywords: 'inbox accept decline dashboard' },
+        { href: '/mentor', label: 'Home', icon: LayoutDashboard, keywords: 'requests inbox accept decline dashboard' },
         { href: '/mentorships', label: 'Mentees', icon: Users, keywords: 'sessions goals messages' },
         { href: '/mentor/availability', label: 'Capacity', icon: Gauge, keywords: 'availability pause limit slots' },
         { href: '/mentor/profile', label: 'Profile', icon: ShieldCheck, keywords: 'verification expertise bio fee' },
@@ -110,7 +108,6 @@ export const NAV: Record<Role, NavGroup[]> = {
 export const ACCOUNT_NAV: NavItem[] = [
   { href: '/notifications', label: 'Notifications', icon: Bell },
   { href: '/settings', label: 'Settings', icon: Settings2, keywords: 'calendar google outlook notifications account' },
-  { href: '/privacy', label: 'Privacy statement', icon: Lock },
 ];
 
 export const ROLE_LABEL: Record<Role, string> = { student: 'Student', alumnus: 'Alumni mentor', aro: 'Alumni Relations', placement: 'Placement Office', admin: 'Administrator' };

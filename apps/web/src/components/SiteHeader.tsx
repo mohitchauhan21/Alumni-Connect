@@ -79,7 +79,7 @@ function useActiveIndex(path: string) {
 }
 
 /**
- * The one public navbar: landing, sign-in pages, privacy statement, demo and 404. A translucent bar
+ * The one public navbar: landing, sign-in pages, legal pages, demo and 404. A translucent bar
  * with the gooey pill nav in the middle; phones get the same links in a drop-down. Signed-in
  * visitors see a Dashboard button instead of Sign in / Get started.
  */

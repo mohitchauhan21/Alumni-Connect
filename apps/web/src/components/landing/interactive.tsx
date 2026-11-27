@@ -1,12 +1,11 @@
 'use client';
 import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
-import { gsap } from 'gsap';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 /*
  * Pointer and scroll interactions for the landing page, adapted from React Bits
- * (github.com/DavidHDev/react-bits, MIT — see components/reactbits/LICENSE.md): ScrollVelocity,
- * SpotlightCard and Magnet, trimmed to what this page uses and fitted to the site's tokens.
+ * (github.com/DavidHDev/react-bits, MIT — see components/reactbits/LICENSE.md): ScrollVelocity
+ * and SpotlightCard, trimmed to what this page uses and fitted to the site's tokens.
  */
 
 const wrap = (min: number, max: number, v: number) => {
@@ -72,42 +71,6 @@ export function SpotlightCard({ children, className = '' }: { children: React.Re
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 [background:radial-gradient(420px_circle_at_var(--sx,50%)_var(--sy,0%),rgba(207,74,6,0.10),transparent_65%)] group-hover:opacity-100 dark:[background:radial-gradient(420px_circle_at_var(--sx,50%)_var(--sy,0%),rgba(251,146,60,0.16),transparent_65%)]" />
       <div aria-hidden className="spotlight-edge pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       {children}
-    </div>
-  );
-}
-
-/**
- * Pulls its child gently toward the pointer when it comes within `padding` px, then springs back.
- * Fine pointers only — on touch screens it stays put.
- */
-export function Magnet({ children, padding = 70, strength = 4, className = '' }: { children: React.ReactNode; padding?: number; strength?: number; className?: string }) {
-  const outer = useRef<HTMLDivElement>(null);
-  const inner = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const o = outer.current;
-    const i = inner.current;
-    if (!o || !i) return;
-    if (!window.matchMedia('(pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
-    const toX = gsap.quickTo(i, 'x', { duration: 0.6, ease: 'elastic.out(1, 0.45)' });
-    const toY = gsap.quickTo(i, 'y', { duration: 0.6, ease: 'elastic.out(1, 0.45)' });
-    const onMove = (e: PointerEvent) => {
-      const r = o.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const near = Math.abs(e.clientX - cx) < r.width / 2 + padding && Math.abs(e.clientY - cy) < r.height / 2 + padding;
-      toX(near ? (e.clientX - cx) / strength : 0);
-      toY(near ? (e.clientY - cy) / strength : 0);
-    };
-    window.addEventListener('pointermove', onMove, { passive: true });
-    return () => window.removeEventListener('pointermove', onMove);
-  }, [padding, strength]);
-
-  return (
-    <div ref={outer} className={`inline-block ${className}`}>
-      <div ref={inner} className="will-change-transform">
-        {children}
-      </div>
     </div>
   );
 }

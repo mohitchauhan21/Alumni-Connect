@@ -44,7 +44,7 @@ export default function TermsPage() {
       </ul>
 
       <h2>6. Your content and your data</h2>
-      <p>You keep ownership of what you write. You give us permission to store and display it to the people the platform shows it to, only to run the service. How we handle personal data is described in the <Link href="/privacy">privacy statement</Link>. You can download your data or delete your account at any time from Settings.</p>
+      <p>You keep ownership of what you write. You give us permission to store and display it to the people the platform shows it to, only to run the service. You can download your data or delete your account at any time from Settings.</p>
 
       <h2>7. Availability and changes</h2>
       <p>We work to keep the platform available and secure but can’t promise it will be uninterrupted or error-free. We may change features, and we’ll update these terms when needed — material changes will be announced on the platform before they take effect.</p>

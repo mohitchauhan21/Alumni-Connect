@@ -24,7 +24,6 @@ const COLUMNS: { title: string; links: [string, string][] }[] = [
     title: 'Company',
     links: [
       ['Contact', '/contact'],
-      ['Privacy statement', '/privacy'],
       ['Terms of service', '/terms'],
       ['Cancellations & refunds', '/refunds'],
     ],

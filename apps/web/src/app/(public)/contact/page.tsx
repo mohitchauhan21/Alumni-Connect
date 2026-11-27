@@ -47,7 +47,7 @@ export default function ContactPage() {
           </p>
         )}
         <p className="!mt-0 py-4 !text-[14px]">
-          Already a member? Most questions are answered in your account — see <Link href="/refunds">cancellations &amp; refunds</Link>, the <Link href="/privacy">privacy statement</Link> and the <Link href="/terms">terms</Link>.
+          Already a member? Most questions are answered in your account — see <Link href="/refunds">cancellations &amp; refunds</Link> and the <Link href="/terms">terms</Link>.
         </p>
       </div>
     </LegalPage>

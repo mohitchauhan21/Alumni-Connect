@@ -1,6 +1,6 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, ChevronsLeft, ChevronsUpDown, Lock, LogOut, Menu, Moon, Search, Settings2, Sun, X } from 'lucide-react';
+import { Bell, ChevronsLeft, ChevronsUpDown, LogOut, Menu, Moon, Search, Settings2, Sun, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -23,7 +23,7 @@ const matches = (path: string, href: string) => path === href || (!ROOTS.has(hre
 
 /**
  * Signed-in layout. All navigation lives in the sidebar: search, the role's sections,
- * Notifications (with its unread count), and the account menu (Settings, privacy, theme, sign out).
+ * Notifications (with its unread count), and the account menu (Settings, theme, sign out).
  * On desktop it is docked and collapses to an icon rail (remembered per browser); on phones the
  * same sidebar slides in from the menu button.
  */
@@ -364,9 +364,6 @@ function AccountMenu({ name, email, avatarUrl, role, rail, active, onSignOut }: 
             <div className="my-1 h-px bg-[color:var(--line)]" />
             <Link href="/settings" role="menuitem" className={row}>
               <Settings2 size={15} className="text-ink-400" /> Settings
-            </Link>
-            <Link href="/privacy" role="menuitem" className={row}>
-              <Lock size={15} className="text-ink-400" /> Privacy statement
             </Link>
             <button role="menuitem" className={row} onClick={toggle}>
               {theme === 'dark' ? <Sun size={15} className="text-ink-400" /> : <Moon size={15} className="text-ink-400" />}
