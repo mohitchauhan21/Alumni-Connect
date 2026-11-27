@@ -12,9 +12,11 @@ import { SmoothScroll } from '@/components/landing/SmoothScroll';
 import { ScrollRevealText, SplitReveal } from '@/components/landing/text';
 import { CapacityVisual, MatchVisual, ProductPreview, ReportVisual } from '@/components/landing/visuals';
 import { CountUp, Reveal } from '@/components/motion';
+import ShapeGrid from '@/components/reactbits/ShapeGrid';
 import { SessionCountdown } from '@/components/SessionCountdown';
 import { SiteFooter } from '@/components/SiteFooter';
 import { cx } from '@/components/ui';
+import { useTheme } from '@/lib/theme';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -22,7 +24,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    illustrative (labelled as such) and every claim is a property of how the platform works.
 
    Motion: Lenis smooth scroll drives GSAP ScrollTrigger; headings rise in with GSAP SplitText;
-   React Bits–style marquee, scroll-reveal text and spotlight cards. Buttons stay still. Everything
+   a React Bits ShapeGrid behind the hero; React Bits–style marquee, scroll-reveal text and spotlight cards. Buttons stay still. Everything
    falls back to still, fully readable content under reduced motion. */
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -85,6 +87,7 @@ const FAQ = [
 
 export default function Landing() {
   const page = useRef<HTMLDivElement>(null);
+  const dark = useTheme().theme === 'dark';
 
   // Scroll-linked motion that spans sections: hero parallax, the product preview standing up,
   // floating chips drifting at their own speeds, and the "how it works" line drawing itself.
@@ -118,6 +121,19 @@ export default function Landing() {
 
       {/* ───────────────────────────── hero */}
       <section className="hero relative isolate overflow-hidden">
+        {/* React Bits ShapeGrid: a slowly drifting grid whose cells glow orange under the pointer */}
+        <div aria-hidden className="absolute inset-0 -z-20">
+          <ShapeGrid
+            shape="square"
+            direction="diagonal"
+            speed={0.35}
+            cellSize={44}
+            lineColor={dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}
+            hoverColor="#f97316"
+            fillOpacity={0.12}
+            glow={0.35}
+          />
+        </div>
         {/* a still, soft wash of the accent behind the headline */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_55%_at_50%_30%,rgba(207,74,6,0.08),transparent_70%)] dark:bg-[radial-gradient(70%_55%_at_50%_30%,rgba(251,146,60,0.14),transparent_70%)]" />
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-48 bg-gradient-to-b from-transparent to-canvas" />
