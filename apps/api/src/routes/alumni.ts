@@ -6,12 +6,14 @@ import { badRequest, notFound } from '../lib/errors.js';
 import { sniffDocumentType } from '../lib/filetype.js';
 import { logger } from '../lib/logger.js';
 import { maskContactDetails } from '../lib/mask.js';
+import { normalizeMeetLink } from '../lib/meet.js';
 import { escapeRegex } from '../lib/regex.js';
 import { requireRole, requireVerifiedEmail } from '../middleware/auth.js';
 import { ah, oid, parse } from '../middleware/common.js';
-import { Alumnus, AvailabilityWindow, DEPARTMENTS, InstitutionRecord, MENTORING_AREAS, MentorCapacity, User, VerificationRequest } from '../models/index.js';
+import { Alumnus, AvailabilityWindow, DEPARTMENTS, InstitutionRecord, MENTORING_AREAS, MentorCapacity, Mentorship, Session, User, VerificationRequest } from '../models/index.js';
 import { availabilityView, capacityView, mentorSelf, verificationView } from '../serializers/index.js';
 import { audit } from '../services/audit.js';
+import { jitsiLink } from '../services/calendar.js';
 import { storage } from '../services/storage.js';
 import { getSettings } from '../services/settings.js';
 import { decideVerification, normalizeName, submitVerification } from '../services/verification.js';
@@ -42,7 +44,7 @@ r.get(
   '/me',
   requireRole('alumnus'),
   ah(async (req, res) => {
-    const a = await Alumnus.findOne({ user: req.viewer!.id }).select('+linkedinUrl').populate('expertise').lean();
+    const a = await Alumnus.findOne({ user: req.viewer!.id }).select('+linkedinUrl +meetLink').populate('expertise').lean();
     if (!a) throw notFound('Alumnus profile');
     const [u, cap, windows, ver] = await Promise.all([
       User.findById(req.viewer!.id).select('+email +phone').lean(),
@@ -76,6 +78,8 @@ const profileSchema = z.object({
   degree: z.string().trim().max(60).optional(),
   graduationYear: z.number().int().min(1950).max(2100).optional(),
   sessionFee: z.number().int().min(0).max(100000).optional(),
+  /** The mentor's own Google Meet room; '' removes it. */
+  meetLink: z.string().trim().max(200).optional(),
 });
 
 r.put(
@@ -87,8 +91,14 @@ r.put(
       const max = (await getSettings()).payments?.maxSessionFee ?? 0;
       if (b.sessionFee > max) throw badRequest('fee_too_high', `The programme allows at most ₹${max} per session`);
     }
-    const a = await Alumnus.findOne({ user: req.viewer!.id });
+    let meetLink: string | undefined;
+    if (b.meetLink !== undefined) {
+      meetLink = b.meetLink === '' ? '' : (normalizeMeetLink(b.meetLink) ?? undefined);
+      if (meetLink === undefined) throw badRequest('invalid_meet_link', 'Paste a Google Meet link like https://meet.google.com/abc-defg-hij');
+    }
+    const a = await Alumnus.findOne({ user: req.viewer!.id }).select('+meetLink');
     if (!a) throw notFound('Alumnus profile');
+    const previousMeet = a.meetLink ?? '';
     // Academic identity is locked once verified against institutional records.
     if (a.verificationStatus === 'verified') {
       delete b.department;
@@ -99,11 +109,29 @@ r.put(
     for (const k of ['headline', 'bio', 'currentRole', 'currentCompany', 'city'] as const) {
       if (typeof b[k] === 'string') b[k] = maskContactDetails(b[k]!).text;
     }
+    delete b.meetLink;
     Object.assign(a, { ...b, expertise: b.expertise ? b.expertise.map((x) => oid(x, 'Tag')) : a.expertise });
+    if (meetLink !== undefined) a.meetLink = meetLink || undefined;
     await a.save();
+    if (meetLink !== undefined && meetLink !== previousMeet) await relinkUpcomingSessions(a._id, previousMeet, meetLink);
     res.json({ ok: true });
   }),
 );
+
+/**
+ * Keeps already-booked sessions in step with the mentor's Meet room: a new room replaces the link of
+ * every upcoming confirmed session; removing it gives the sessions that used it a fresh Jitsi room.
+ */
+async function relinkUpcomingSessions(alumnusId: unknown, previous: string, next: string) {
+  const ms = await Mentorship.find({ alumnus: alumnusId }).select('_id').lean();
+  const upcoming = { mentorship: { $in: ms.map((m) => m._id) }, status: 'scheduled', scheduledStart: { $gt: new Date() } };
+  if (next) {
+    await Session.updateMany(upcoming, { $set: { videoLink: next } });
+    return;
+  }
+  const using = await Session.find({ ...upcoming, videoLink: previous }).select('_id').lean();
+  for (const s of using) await Session.updateOne({ _id: s._id }, { $set: { videoLink: jitsiLink() } });
+}
 
 /* ------------------------------------------------------- verification */
 r.post(

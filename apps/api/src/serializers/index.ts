@@ -127,6 +127,7 @@ export function mentorSelf(a: Doc, user: Doc) {
     mentorOptIn: a.mentorOptIn,
     rollNumber: a.rollNumber ?? null,
     linkedinUrl: a.linkedinUrl ?? null,
+    meetLink: a.meetLink ?? null,
     user: selfUser(user),
   };
 }
@@ -379,7 +380,7 @@ export function findPrivacyViolations(payload: unknown, viewer: Viewer | null): 
       const p = `${path}.${k}`;
       if (ALWAYS_FORBIDDEN.has(k) && v != null) violations.push(p);
       else if (!staffContact && CONTACT_KEYS.has(k) && typeof v === 'string' && v !== '' && !own.has(v.toLowerCase())) violations.push(p);
-      else if (viewer?.role === 'student' && (k === 'linkedinUrl' || k === 'mentorPrivateNotes' || k === 'contact') && v != null) violations.push(p);
+      else if (viewer?.role === 'student' && (k === 'linkedinUrl' || k === 'meetLink' || k === 'mentorPrivateNotes' || k === 'contact') && v != null) violations.push(p);
       else walk(v, p, depth + 1);
     }
   };

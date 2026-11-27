@@ -10,8 +10,8 @@ import type { Capacity } from '@/lib/types';
 
 /**
  * The app's UI kit. Quiet by design: flat fills, soft surfaces, one accent.
- * The bigger interactive pieces (glass folder, glass sidebar, gooey nav, tear ticket, logo
- * reveal) live next to this file in components/ui/.
+ * The bigger interactive pieces (glass folder, glass sidebar, gooey nav) live next to this
+ * file in components/ui/.
  */
 
 const EASE = [0.22, 1, 0.36, 1] as const;

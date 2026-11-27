@@ -13,10 +13,9 @@ import { ScrollRevealText, SplitReveal } from '@/components/landing/text';
 import { VantaNet } from '@/components/landing/VantaNet';
 import { CapacityVisual, MatchVisual, ProductPreview, ReportVisual } from '@/components/landing/visuals';
 import { CountUp, Reveal } from '@/components/motion';
+import { SessionCountdown } from '@/components/SessionCountdown';
 import { SiteFooter } from '@/components/SiteFooter';
-import TearTicket from '@/components/ui/tear-ticket';
 import { cx } from '@/components/ui';
-import { useTheme } from '@/lib/theme';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -400,7 +399,7 @@ const CHAPTERS = [
   {
     kicker: 'Sessions',
     title: 'Every session, one tap away.',
-    body: 'Propose times, confirm, and join by video. Goals and action items live alongside the conversation, and both sides leave feedback after each session. Booked sessions come with a pass — try tearing it.',
+    body: 'Propose times, confirm, and join by video. Your next session counts down on your dashboard, and Join lights up ten minutes before — in the mentor’s own Google Meet room if they’ve set one. Goals and action items live alongside, and both sides leave feedback after each session.',
   },
   {
     kicker: 'Reporting',
@@ -481,52 +480,23 @@ function ChapterVisual({ i }: { i: number }) {
   return <ReportVisual />;
 }
 
+/** The dashboard's countdown card, ticking toward a pretend session. Mounted client-side only, so
+    the server render and the first client render can't disagree about the time. */
 function SessionPassVisual() {
-  const dark = useTheme().theme === 'dark';
-  const [torn, setTorn] = useState(false);
+  const [start, setStart] = useState<number | null>(null);
+  useEffect(() => setStart(Date.now() + ((2 * 24 + 4) * 60 + 13) * 60e3 + 42e3), []);
   return (
-    <div className="flex flex-col items-center">
-      <div className="w-full max-w-[460px] drop-shadow-[0_30px_50px_rgba(0,0,0,0.14)] dark:drop-shadow-[0_30px_50px_rgba(0,0,0,0.6)]">
-        <TearTicket
-          width={460}
-          height={224}
-          stubSize={140}
-          radius={20}
-          rotate={-3}
-          background={dark ? '#1c1c1e' : '#ffffff'}
-          color={dark ? '#f5f5f7' : '#1d1d1f'}
-          ariaLabel="Tear the stub to join the session"
-          onTear={() => setTorn(true)}
-          stub={
-            <div className="flex h-full flex-col items-center justify-center gap-1 px-4 text-center">
-              <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] opacity-50">Admit one</span>
-              <span className="text-[21px] font-semibold tracking-[-0.03em]">Join</span>
-              <span className="mt-2 text-[11px] opacity-50">Pull to tear ›</span>
-            </div>
-          }
-        >
-          <div className="flex h-full flex-col justify-between p-6 text-left">
-            <div>
-              <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-brand-600 dark:text-[#fb923c]">Session pass</span>
-              <p className="mt-2 text-[22px] font-semibold leading-tight tracking-[-0.03em]">Mock interview</p>
-              <p className="mt-1 text-[13px] opacity-60">with your mentor · 45 min</p>
-            </div>
-            <div className="flex gap-6 text-[12px]">
-              <div>
-                <div className="opacity-45">When</div>
-                <div className="mt-0.5 font-semibold">Thu · 6:00 pm</div>
-              </div>
-              <div>
-                <div className="opacity-45">Where</div>
-                <div className="mt-0.5 font-semibold">Video call</div>
-              </div>
-            </div>
-          </div>
-        </TearTicket>
-      </div>
-      <p className="mt-5 h-5 text-[13px] text-ink-500" aria-live="polite">
-        {torn ? 'That’s it — you’re in.' : 'Pull the stub to tear it.'}
-      </p>
+    <div className="mx-auto w-full max-w-[480px]">
+      {start ? (
+        <SessionCountdown
+          preview
+          withName="your mentor"
+          meeting={{ id: 'preview', title: 'Mock interview', scheduledStart: new Date(start).toISOString(), scheduledEnd: new Date(start + 45 * 60e3).toISOString(), videoLink: 'https://meet.google.com/abc-defg-hij' }}
+        />
+      ) : (
+        <div className="h-[360px] rounded-[28px] bg-surface shadow-card" />
+      )}
+      <p className="mt-3 text-center text-[11.5px] text-ink-400">Illustrative example</p>
     </div>
   );
 }

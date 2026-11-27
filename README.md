@@ -77,7 +77,7 @@ Seed contents: **60 verified alumni** (each matched to an institutional record w
 | Email (SMTP) | No | Every email is written to `apps/api/outbox/*.json` so you can read it |
 | SMS (Twilio) | No | Written to `apps/api/outbox/` |
 | Google / Outlook calendar | No | Every session has an **.ics download**; "Connect calendar" shows *Not enabled on this server* |
-| Video calls | No | A unique Jitsi Meet link per session (no account needed) |
+| Video calls | No | A unique Jitsi Meet link per session (no account needed), or the mentor's own Google Meet room if they add one in **Profile → Video calls** |
 | Docker | No | Only for the production-style setup in §8 |
 
 **For production you must set:** `JWT_SECRET`, `MONGODB_URI`, `DATA_ENCRYPTION_KEY`, `SMTP_URL`, `MAIL_FROM`, `COOKIE_SECURE=true`, and https:// values for `WEB_ORIGIN` and `PUBLIC_API_URL`. The API checks these at startup and refuses to run without them, listing exactly what is missing. See the [go-live checklist](#go-live-checklist).
@@ -306,7 +306,8 @@ This is a production setup: put the values it asks for (`JWT_SECRET`, `DATA_ENCR
 
 **Other UX**
 - **Student home** built around one adaptive "next best step", with a profile-strength ring.
-- **Session pass** (`components/SessionPass.tsx`): when a student and mentor have a confirmed meeting, both see it as a ticket on their home page and on the mentorship's Sessions tab, from booking until it ends ("Live now" while it's on). Tearing the stub (drag it, or focus it and press Enter) opens the video call directly, in the same tab. The API sends each participant their mentorship's `nextMeeting`; staff never get meeting links (`tests/sessionPass.test.ts`).
+- **Session countdown** (`components/SessionCountdown.tsx`): when a student and mentor have a confirmed meeting, both see a live countdown (days, hours, minutes, seconds) on their home page and on the mentorship's Sessions tab, with Add to calendar. **Join** switches on ten minutes before the start and opens the call in a new tab; while it's on, the card shows "Live now" and how much time is left. The API sends each participant their mentorship's `nextMeeting`; staff never get meeting links (`tests/sessionPass.test.ts`).
+- **Mentor's own Google Meet room** (`lib/meet.ts`): a mentor can paste a Meet link (`meet.google.com/abc-defg-hij`) under **Profile → Video calls**. Sessions they confirm then use it instead of a generated Jitsi room, and saving it updates their upcoming sessions; clearing it gives those sessions fresh Jitsi rooms. Only standard Meet room codes are accepted, and the link is private: students only receive it as the video link of their own confirmed sessions (`tests/meetLink.test.ts`).
 - **Onboarding** (`components/Onboarding.tsx`): a short full-screen setup for new students (welcome, how it works, what they're aiming for) and new alumni (welcome, verification, how they'd like to help). Answers are saved to the profile. It shows once per account on any device: sign-up sets `onboardingPending`, and finishing or skipping clears it for good. Older, seeded and staff accounts never see it (`tests/onboarding.test.ts`).
 - **Your data** (Settings): the data export as a glass folder with four parts; open it and pick a part to download just that, or download everything.
 - **Mentor inbox** as a keyboard master–detail view: ↑↓ to browse, **A** to accept, **D** to decline.
@@ -321,9 +322,7 @@ This is a production setup: put the values it asks for (`JWT_SECRET`, `DATA_ENCR
 |---|---|---|
 | `gooey-nav.tsx` | React Bits (MIT) | Public navbar |
 | `liquid-glass-expandable-sidebar.tsx` | 21st.dev, Troy Lorents / Automate Flows (MIT) | Not currently used (the app now uses a flat docked sidebar) |
-| `liquid-glass-logo-reveal.tsx` | 21st.dev, from zanwei/glass-icon-reveal (MIT) | First-visit intro (adds `onComplete`) |
 | `glass-folder-cards.tsx` | 21st.dev | Settings → Your data |
-| `tear-ticket.tsx` | React Bits (MIT) | Landing hero, student home session pass |
 
 Older React Bits pieces in `components/reactbits/` (MIT + Commons Clause, licence in that folder) are still used: AnimatedList (mentor inbox), Stepper (verification wizard) and ClickSpark (accept confirmation).
 

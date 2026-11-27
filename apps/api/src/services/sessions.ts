@@ -1,7 +1,7 @@
 import { env } from '../config/env.js';
 import { HOUR_MS, type Clock, systemClock } from '../lib/clock.js';
 import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
-import { CalendarConnection, Mentorship, Payment, Session } from '../models/index.js';
+import { Alumnus, CalendarConnection, Mentorship, Payment, Session } from '../models/index.js';
 import type { Viewer } from '../serializers/index.js';
 import { mentorshipAccess, touchMentorship, type MentorshipAccess } from './access.js';
 import { audit } from './audit.js';
@@ -132,6 +132,9 @@ export async function confirmSession(viewer: Viewer, acc: MentorshipAccess, s: I
     }
   }
   s.externalEvents = external as any;
+  // The mentor's own Google Meet room, when they've set one, wins over a generated link.
+  const mentor = await Alumnus.findById(acc.mentorship.alumnus).select('+meetLink').lean();
+  if (mentor?.meetLink) s.videoLink = mentor.meetLink;
   await s.save();
   await touchMentorship(acc.mentorship._id, clock());
   await audit(viewer, 'session.scheduled', 'Session', s._id);

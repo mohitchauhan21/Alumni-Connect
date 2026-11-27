@@ -75,7 +75,7 @@ export async function exportMyData(viewer: Viewer) {
       mentorshipFilter = { student: p._id };
     }
   } else if (viewer.role === 'alumnus') {
-    const a = await Alumnus.findOne({ user: viewer.id }).select('+linkedinUrl').populate('expertise').lean();
+    const a = await Alumnus.findOne({ user: viewer.id }).select('+linkedinUrl +meetLink').populate('expertise').lean();
     if (a) {
       out.profile = mentorSelf(a, user);
       out.capacity = capacityView(await MentorCapacity.findOne({ alumnus: a._id }).lean());
@@ -166,7 +166,7 @@ export async function deleteMyAccount(viewer: Viewer, input: { confirm: string; 
       { _id: profile._id },
       {
         $set: { mentorOptIn: false, verificationStatus: 'unverified', expertise: [], mentoringAreas: [], languages: [], sessionFee: 0 },
-        $unset: { headline: 1, currentRole: 1, currentCompany: 1, city: 1, bio: 1, linkedinUrl: 1, rollNumber: 1, institutionRecord: 1, verifiedAt: 1 },
+        $unset: { headline: 1, currentRole: 1, currentCompany: 1, city: 1, bio: 1, linkedinUrl: 1, meetLink: 1, rollNumber: 1, institutionRecord: 1, verifiedAt: 1 },
       },
     );
     await MentorCapacity.updateOne({ alumnus: profile._id }, { $set: { paused: true, pauseReason: 'Account deleted' } });

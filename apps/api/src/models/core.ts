@@ -108,6 +108,9 @@ const alumnusSchema = new Schema(
     languages: [String],
     // PRIVATE: LinkedIn is the over-contact vector this platform replaces; staff-only.
     linkedinUrl: { type: String, select: false },
+    // PRIVATE: the mentor's own Google Meet room. Students only ever receive it as the video link of
+    // a confirmed session with this mentor, never on the profile.
+    meetLink: { type: String, select: false },
   },
   { timestamps: true },
 );

@@ -39,7 +39,7 @@ r.get(
       { $group: { _id: '$mentorship', next: { $first: '$scheduledStart' } } },
     ]);
     const nextBy = new Map(upcoming.map((u: any) => [String(u._id), u.next]));
-    // The next meeting to join, for the session pass. Includes one already in progress (it hasn't
+    // The next meeting to join, for the countdown card. Includes one already in progress (it hasn't
     // ended yet), and only goes to the two people in the mentorship: staff never get meeting links.
     const participant = v.role === 'student' || v.role === 'alumnus';
     const meetings = participant

@@ -13,7 +13,7 @@ import { post } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { AREA_LABELS, DECLINE_LABELS, fmtDateTime, relTime } from '@/lib/format';
 import { useApi } from '@/lib/hooks';
-import { SessionPass, soonestMeeting } from '@/components/SessionPass';
+import { SessionCountdown, soonestMeeting } from '@/components/SessionCountdown';
 import type { Capacity, MentorshipRequest, Mentorship } from '@/lib/types';
 
 type Cap = Capacity & { maxPendingRequests: number; pendingRequests: number; visibleInDiscovery: boolean; pauseReason: string | null };
@@ -173,10 +173,10 @@ function Dashboard() {
         }
       />
 
-      {/* the next meeting as a pass: tearing the stub joins the video call */}
+      {/* the next meeting, counting down; Join switches on ten minutes before */}
       {pass && (
-        <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="mb-8 rounded-[22px] bg-ink-900/[0.03] px-4 py-8" aria-label="Your next session">
-          <SessionPass meeting={pass.meeting} withName={pass.withName} mentorshipId={pass.mentorshipId} />
+        <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="mb-8" aria-label="Your next session">
+          <SessionCountdown meeting={pass.meeting} withName={pass.withName} mentorshipId={pass.mentorshipId} />
         </motion.section>
       )}
 

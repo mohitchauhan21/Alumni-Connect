@@ -1,5 +1,6 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
+import { ExternalLink, Video } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
 import { EducationIcon, ProfileEntry, ProfileHeader, ProfileSection } from '@/components/Profile';
 import { ChipToggle, ErrorBox, Field, PageLoader, Spinner, StatusBadge, useToast } from '@/components/ui';
@@ -10,6 +11,9 @@ import { useApi } from '@/lib/hooks';
 import { inr, usePaymentConfig } from '@/lib/payments';
 import { VerificationWizard } from '@/components/VerificationWizard';
 import type { Tag } from '@/lib/types';
+
+/** Mirrors the API's check (lib/meet.ts): a standard Meet room code, with or without https://. */
+const MEET_LINK = /^(?:https?:\/\/)?meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}\/?(?:[?#].*)?$/i;
 
 function Inner() {
   const toast = useToast();
@@ -26,7 +30,7 @@ function Inner() {
   useEffect(() => {
     if (data?.profile && !form) {
       const p = data.profile;
-      setForm({ headline: p.headline ?? '', currentRole: p.currentRole ?? '', currentCompany: p.currentCompany ?? '', industry: p.industry ?? '', yearsExperience: p.yearsExperience ?? '', city: p.city ?? '', bio: p.bio ?? '', expertise: p.expertise.map((t: Tag) => t.id), mentoringAreas: p.mentoringAreas, languages: (p.languages ?? []).join(', '), linkedinUrl: p.linkedinUrl ?? '', mentorOptIn: p.mentorOptIn, sessionFee: String(p.sessionFee ?? 0) });
+      setForm({ headline: p.headline ?? '', currentRole: p.currentRole ?? '', currentCompany: p.currentCompany ?? '', industry: p.industry ?? '', yearsExperience: p.yearsExperience ?? '', city: p.city ?? '', bio: p.bio ?? '', expertise: p.expertise.map((t: Tag) => t.id), mentoringAreas: p.mentoringAreas, languages: (p.languages ?? []).join(', '), linkedinUrl: p.linkedinUrl ?? '', mentorOptIn: p.mentorOptIn, sessionFee: String(p.sessionFee ?? 0), meetLink: p.meetLink ?? '' });
     }
   }, [data, form]);
 
@@ -43,6 +47,7 @@ function Inner() {
         industry: form.industry || undefined,
         languages: form.languages.split(',').map((s: string) => s.trim()).filter(Boolean),
         sessionFee: Math.max(0, Math.round(Number(form.sessionFee) || 0)),
+        meetLink: form.meetLink.trim(),
       });
       toast('Profile saved');
       reload();
@@ -53,12 +58,14 @@ function Inner() {
     }
   }
 
+  const meetTyped = form.meetLink.trim();
+  const meetOk = !meetTyped || MEET_LINK.test(meetTyped);
   const tagsByCat = (tags.data?.tags ?? []).reduce<Record<string, Tag[]>>((acc, t) => ((acc[t.category ?? 'Other'] ??= []).push(t), acc), {});
 
   const name = me?.user.name ?? p.name;
   const verified = p.verificationStatus === 'verified';
   const save_ = (
-    <button className="btn-primary px-5" onClick={save} disabled={busy}>
+    <button className="btn-primary px-5" onClick={save} disabled={busy || !meetOk}>
       {busy && <Spinner />} Save profile
     </button>
   );
@@ -186,6 +193,32 @@ function Inner() {
                 </p>
               )}
               {pay && !pay.enabled && <p className="mt-3 text-[12.5px] text-amber-800">Paid sessions are switched off for the programme right now, so sessions stay free.</p>}
+            </ProfileSection>
+          </div>
+          <div id="video" className="scroll-mt-24">
+            <ProfileSection title="Video calls">
+              <Field label="Your Google Meet link" hint="Sessions you confirm use this room instead of an auto-generated Jitsi link. Only your mentees see it, and only on their confirmed sessions with you.">
+                <div className="relative">
+                  <Video size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
+                  <input
+                    className={`input pl-10 ${meetOk ? '' : 'border-red-500 focus:border-red-500 focus:ring-red-500/20'}`}
+                    value={form.meetLink}
+                    onChange={(e) => setForm({ ...form, meetLink: e.target.value })}
+                    placeholder="https://meet.google.com/abc-defg-hij"
+                    inputMode="url"
+                    aria-invalid={!meetOk}
+                  />
+                </div>
+              </Field>
+              {!meetOk && <p className="mt-2 text-[12.5px] text-red-600">That doesn’t look like a Google Meet link. It should look like meet.google.com/abc-defg-hij.</p>}
+              {meetOk && meetTyped && (
+                <a href={meetTyped.startsWith('http') ? meetTyped : `https://${meetTyped}`} target="_blank" rel="noopener noreferrer" className="link mt-2 inline-flex items-center gap-1 text-[12.5px]">
+                  Test this link <ExternalLink size={12} />
+                </a>
+              )}
+              <p className="mt-3 text-[12.5px] leading-relaxed text-ink-500">
+                In Google Meet, choose <span className="font-medium text-ink-700">New meeting → Create a meeting for later</span> and paste the link here. Saving also updates your upcoming sessions. Leave it empty to go back to Jitsi.
+              </p>
             </ProfileSection>
           </div>
           <ProfileSection title="Private (staff only)">
